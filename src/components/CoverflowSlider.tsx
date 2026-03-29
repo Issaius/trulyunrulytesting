@@ -38,9 +38,9 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
         <div className="relative w-full flex flex-col items-center px-6">
 
             {/* Title (file name) */}
-            <h2 className="mb-1" style={{ padding: 0 }}>
+            <h3 className="text-2xl lg:text-3xl font-serif mb-1" style={{ padding: 0 }}>
                 {getFileName(current.src)}
-            </h2>
+            </h3>
 
             {/* Caption (just below the title) */}
             <p
@@ -53,47 +53,53 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                 {current.alt}
             </p>
 
-            {/* Image container */}
-            <div className="relative w-full max-w-[500px] aspect-[2/3] bg-zinc-900">
-                {slides.map((slide, index) => (
-                    <div
-                        key={index}
-                        className="absolute inset-0 transition-opacity duration-700"
-                        style={{
-                            opacity: index === currentIndex ? 1 : 0,
-                            pointerEvents: index === currentIndex ? 'auto' : 'none',
-                        }}
-                    >
-                        <Image
-                            src={slide.src}
-                            alt={slide.alt}
-                            fill
-                            className="object-cover"
-                            priority={index === currentIndex}
-                        />
-                    </div>
-                ))}
-
-                {/* Navigation Buttons */}
+            {/* Wrapper for buttons and image */}
+            <div className="flex items-center justify-center w-full max-w-full gap-3 md:gap-6">
+                
+                {/* Navigation Button (Prev) */}
                 <button
                     onClick={prevSlide}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-[48px] h-[48px] rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center transition-colors z-10 backdrop-blur-md cursor-pointer"
+                    className="flex-shrink-0 w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
                     aria-label="Previous Slide"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
 
+                {/* Image container */}
+                <div className="relative w-full max-w-[500px] aspect-[2/3] md:max-w-[min(100%,90vh,1100px)] md:aspect-[3/2] bg-zinc-900 min-w-0">
+                    {slides.map((slide, index) => (
+                        <div
+                            key={index}
+                            className="absolute inset-0 transition-opacity duration-700"
+                            style={{
+                                opacity: index === currentIndex ? 1 : 0,
+                                pointerEvents: index === currentIndex ? 'auto' : 'none',
+                            }}
+                        >
+                            <Image
+                                src={slide.src}
+                                alt={slide.alt}
+                                fill
+                                className="object-cover"
+                                priority={index === currentIndex}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Navigation Button (Next) */}
                 <button
                     onClick={nextSlide}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-[48px] h-[48px] rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center transition-colors z-10 backdrop-blur-md cursor-pointer"
+                    className="flex-shrink-0 w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
                     aria-label="Next Slide"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                 </button>
+
             </div>
 
 

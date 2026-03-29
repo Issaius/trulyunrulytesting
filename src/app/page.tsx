@@ -98,54 +98,27 @@ export default function Home() {
       <section className="px-6 max-w-6xl mx-auto mb-32">
         <h2 className="headline">the process</h2>
 
-        <div className="flex flex-col gap-[210px] -mt-5">
-          {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800">
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>1. Initial Call</h3>
+        <div className="flex overflow-x-auto snap-x snap-mandatory mt-10 w-[calc(100%+3rem)] -ml-6 px-6 md:w-full md:ml-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {[
+            { id: 1, title: '1. Discovery', desc: 'We get to know each other, talk about what general project you have in mind, and decide if it makes sense to work together.' },
+            { id: 2, title: '2. Ideation', desc: 'Here we discuss the details of the idea you have in mind. If you don\'t yet have a rough idea, I likely have one that you\'ll like.\n\nYou pay after this.' },
+            { id: 3, title: '3. Organisation', desc: 'Here we set the details for the photoshoot. Time, Date, Location, necessary props, outfits and things to organize.' },
+            { id: 4, title: '4. Photoshoot', desc: 'This is where the magic happens. We\'ll spend the allotted time capturing the best possible frames based on our plan.' },
+            { id: 5, title: '5. Selection', desc: 'We review all the raw shots together and select the final images that perfectly capture our desired artistic vision.' },
+            { id: 6, title: '6. Delivery', desc: 'You get exactly what you paid for. The final, fully retouched high-resolution images will be securely delivered to you.' }
+          ].map((step) => (
+            <div 
+              key={step.id} 
+              className="flex-shrink-0 snap-start flex flex-col min-w-[300px] w-[85vw] sm:w-[50vw] md:w-[350px] border-r-2 border-zinc-700 last:border-r-0"
+            >
+              <div className="flex flex-col justify-end h-[120px] px-8 pb-6 border-b-2 border-zinc-700">
+                <h3 className="text-2xl lg:text-3xl font-serif">{step.title}</h3>
               </div>
-              <p className="text-zinc-400 leading-relaxed">We get to know each other, talk about what general project you have in mind, and decide if it makes sense to work together.</p>
-            </div>
-
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>2. Ideation Meeting</h3>
+              <div className="p-8 h-[250px]">
+                <p className="text-zinc-400 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
               </div>
-              <p className="text-zinc-400 leading-relaxed">Here we discuss the details of the idea you have in mind. If you don't yet have a rough idea, I likely have one that you'll like.<br /><br />You pay after this.</p>
             </div>
-
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>3. Preparation Meeting</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">Here we set the details for the photoshoot. Time, Date, Location, necessary props, outfits and things to organize.</p>
-            </div>
-          </div>
-
-          {/* Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800">
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>4. The Photoshoot</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">This is where the magic happens.</p>
-            </div>
-
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>5. Selection Meeting</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">We select the final images that are to be post processed.</p>
-            </div>
-
-            <div className="bg-black p-10 flex flex-col justify-start">
-              <div className="flex flex-col justify-end h-[120px]">
-                <h3 style={{ paddingBottom: '20px' }}>6. fin</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">You get what you paid for.</p>
-            </div>
-          </div>
+          ))}
         </div>
 
       </section>

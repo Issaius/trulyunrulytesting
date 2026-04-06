@@ -3,26 +3,37 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
-type Slide = {
+export type Slide = {
     src: string;
     alt: string;
-    text: string;
+    /** Legacy / unused in UI; kept for compatibility. */
+    text?: string;
+    /** From CMS; when set, used instead of parsing the filename from `src`. */
+    title?: string;
 };
 
 interface CoverflowSliderProps {
     slides: Slide[];
 }
 
-/** Extract a readable filename from the src path (strip path + extension) */
+/** Extract a readable label from a URL path (local or Sanity CDN). */
 function getFileName(src: string): string {
-    const segments = src.split('/');
-    const file = segments[segments.length - 1];
-    // Remove extension
-    return file.replace(/\.[^/.]+$/, '');
+    try {
+        const path = new URL(src).pathname;
+        const file = path.split('/').pop() ?? '';
+        return file.replace(/\.[^/.]+$/, '') || 'slide';
+    } catch {
+        const file = src.split('/').pop()?.split('?')[0] ?? '';
+        return file.replace(/\.[^/.]+$/, '') || 'slide';
+    }
 }
 
 export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    if (slides.length === 0) {
+        return null;
+    }
 
     const nextSlide = () => {
         setCurrentIndex((prev) => (prev + 1) % slides.length);
@@ -37,38 +48,51 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     return (
         <div className="relative w-full flex flex-col items-center px-6">
 
-            {/* Title (file name) */}
-            <h3 className="text-2xl lg:text-3xl font-serif mb-1" style={{ padding: 0 }}>
-                {getFileName(current.src)}
-            </h3>
+            {/* 3:2 landscape; reserve for title row so image + chrome ≤ 100dvh */}
+            <div className="w-full max-w-[min(100%,calc((100dvh-16rem)*3/2))] min-w-0">
+                <div className="flex flex-row justify-between items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div className="min-w-0 flex-1 text-left">
+                        <h3
+                            className="text-2xl lg:text-3xl font-serif mb-1 text-left"
+                            style={{ padding: 0 }}
+                        >
+                            {current.title?.trim() || getFileName(current.src)}
+                        </h3>
+                        <p
+                            className="text-zinc-500 text-left"
+                            style={{
+                                fontFamily: 'var(--font-body)',
+                                fontSize: '28px',
+                            }}
+                        >
+                            {current.alt}
+                        </p>
+                    </div>
+                    <div className="flex flex-shrink-0 items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={prevSlide}
+                            className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
+                            aria-label="Previous Slide"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={nextSlide}
+                            className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
+                            aria-label="Next Slide"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-            {/* Caption (just below the title) */}
-            <p
-                className="text-zinc-500 mb-4"
-                style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '28px',
-                }}
-            >
-                {current.alt}
-            </p>
-
-            {/* Wrapper for buttons and image */}
-            <div className="flex items-center justify-center w-full max-w-full gap-3 md:gap-6">
-                
-                {/* Navigation Button (Prev) */}
-                <button
-                    onClick={prevSlide}
-                    className="flex-shrink-0 w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
-                    aria-label="Previous Slide"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-
-                {/* Image container */}
-                <div className="relative w-full max-w-[500px] aspect-[2/3] md:max-w-[min(100%,90vh,1100px)] md:aspect-[3/2] bg-zinc-900 min-w-0">
+                <div className="relative w-full aspect-[3/2] bg-zinc-900 min-w-0">
                     {slides.map((slide, index) => (
                         <div
                             key={index}
@@ -88,35 +112,6 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                         </div>
                     ))}
                 </div>
-
-                {/* Navigation Button (Next) */}
-                <button
-                    onClick={nextSlide}
-                    className="flex-shrink-0 w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
-                    aria-label="Next Slide"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                </button>
-
-            </div>
-
-
-
-            {/* Slide indicators */}
-            <div className="flex gap-2 mt-6">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentIndex(index)}
-                        className="w-2 h-2 rounded-full transition-colors cursor-pointer"
-                        style={{
-                            backgroundColor: index === currentIndex ? '#fff' : '#555',
-                        }}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
             </div>
 
         </div>

@@ -71,6 +71,12 @@ body {
   line-height: var(--leading-body);
 }
 
+/* Custom cursor (see CursorFollower) — hide system cursor on fine pointers only */
+html.cursor-custom,
+html.cursor-custom * {
+  cursor: none !important;
+}
+
 /* ─── Heading Styles ─────────────────────────────────────────────── */
 
 /* H1 and big section headlines — Landsknecht, 72px, lowercase

@@ -46,7 +46,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const current = slides[currentIndex];
 
     return (
-        <div className="relative w-full flex flex-col items-center px-6">
+        <div className="relative w-full flex flex-col items-center">
 
             {/* 3:2 landscape; reserve for title row so image + chrome ≤ 100dvh */}
             <div className="w-full max-w-[min(100%,calc((100dvh-16rem)*3/2))] min-w-0">
@@ -92,7 +92,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                     </div>
                 </div>
 
-                <div className="relative w-full aspect-[3/2] bg-zinc-900 min-w-0">
+                <div className="relative w-full aspect-[3/2] bg-black min-w-0">
                     {slides.map((slide, index) => (
                         <div
                             key={index}
@@ -106,7 +106,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                                 src={slide.src}
                                 alt={slide.alt}
                                 fill
-                                className="object-cover"
+                                className="object-contain"
                                 priority={index === currentIndex}
                             />
                         </div>

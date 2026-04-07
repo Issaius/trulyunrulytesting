@@ -80,12 +80,14 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
       </section>
 
       {slides.length > 0 ? (
-        <section className="w-full pb-20 overflow-hidden">
-          <CoverflowSlider slides={slides} />
+        <section className="w-full pb-20 overflow-hidden px-6">
+          <div className="max-w-6xl mx-auto">
+            <CoverflowSlider slides={slides} />
+          </div>
         </section>
       ) : (
         <section className="w-full pb-20 px-6 text-zinc-500">
-          <p>No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.</p>
+          <p className="max-w-6xl mx-auto">No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.</p>
         </section>
       )}
 
@@ -143,61 +145,119 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
       <section className="pt-0 pb-32 px-6 max-w-6xl mx-auto">
         <h2 className="headline">pricing</h2>
 
-        <div className="mb-20 -mt-5">
-          <div className="flex items-baseline py-8" style={{ borderBottom: '1px solid #333' }}>
-            <h3 style={{ padding: 0, width: '40%', minWidth: '200px' }}>Quarter Day</h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '2rem', lineHeight: 1, width: '25%' }}>
-              200€
-            </p>
-            <p className="text-zinc-400" style={{ fontFamily: 'var(--font-body)' }}>
-              up to 2 hours of shooting
-            </p>
+        <div className="mb-16 -mt-6">
+          <div className="hidden md:block max-w-5xl mx-auto">
+            <table className="w-full border-collapse text-center">
+              <colgroup>
+                <col className="w-[34%]" />
+                <col className="w-[18%]" />
+                <col className="w-[22%]" />
+                <col className="w-[16%]" />
+              </colgroup>
+              <thead>
+                <tr className="border-b border-zinc-700">
+                  <th className="py-4 text-zinc-300 font-normal">Rates</th>
+                  <th className="py-4 border-l border-zinc-700 px-3 text-zinc-300 font-normal">Travel Time</th>
+                  <th className="py-4 border-l border-zinc-700 px-3 text-zinc-300 font-normal">Included</th>
+                  <th className="py-4 border-l border-zinc-700 px-3 text-zinc-300 font-normal">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { label: '1/4 Day', shooting: '2 Hours', travel: '1 Hour', price: '200€' },
+                  { label: '1/2 Day', shooting: '4 Hours', travel: '2 Hours', price: '350€' },
+                  { label: 'Full Day', shooting: '8 Hours', travel: '3 Hours', price: '700€' },
+                ].map((tier, index) => (
+                  <tr key={tier.label} className="border-b border-zinc-800">
+                    <td className="py-6">
+                      <h3 className="text-4xl" style={{ padding: 0 }}>
+                        {tier.label}
+                      </h3>
+                      <p className="mt-2 text-zinc-300 italic">{tier.shooting}</p>
+                    </td>
+                    <td className="py-6 border-l border-zinc-800 px-3 align-middle">
+                      <p className="text-zinc-300 italic">{tier.travel}</p>
+                    </td>
+                    {index === 0 ? (
+                      <td rowSpan={3} className="py-6 border-l border-zinc-800 px-3 align-middle">
+                        <ul className="space-y-0.5 text-zinc-300 list-none p-0">
+                          <li>The entire process</li>
+                          <li>Commercial usage rights</li>
+                          <li>Web &amp; print versions</li>
+                          <li>Post processing</li>
+                        </ul>
+                      </td>
+                    ) : null}
+                    <td className="py-6 border-l border-zinc-800 px-3 align-middle">
+                      <p
+                        className="font-bold"
+                        style={{ fontFamily: 'var(--font-body)', fontSize: '40px', lineHeight: 1.3 }}
+                      >
+                        {tier.price}
+                      </p>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          <div className="flex items-baseline py-8" style={{ borderBottom: '1px solid #333' }}>
-            <h3 style={{ padding: 0, width: '40%', minWidth: '200px' }}>Half Day</h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '2rem', lineHeight: 1, width: '25%' }}>
-              350€
-            </p>
-            <p className="text-zinc-400" style={{ fontFamily: 'var(--font-body)' }}>
-              up to 4 hours of shooting
-            </p>
-          </div>
-
-          <div className="flex items-baseline py-8">
-            <h3 style={{ padding: 0, width: '40%', minWidth: '200px' }}>Full Day</h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '2rem', lineHeight: 1, width: '25%' }}>
-              700€
-            </p>
-            <p className="text-zinc-400" style={{ fontFamily: 'var(--font-body)' }}>
-              up to 8 hours of shooting
-            </p>
+          <div className="md:hidden space-y-6 text-left">
+            {[
+              { label: '1/4 Day', shooting: '2 Hours', travel: '1 Hour', price: '200€' },
+              { label: '1/2 Day', shooting: '4 Hours', travel: '2 Hours', price: '350€' },
+              { label: 'Full Day', shooting: '8 Hours', travel: '3 Hours', price: '700€' },
+            ].map((tier) => (
+              <div key={tier.label} className="border border-zinc-700 p-6">
+                <h3 className="text-4xl" style={{ padding: 0 }}>
+                  {tier.label}
+                </h3>
+                <div className="mt-5 space-y-3 text-zinc-300">
+                  <p>
+                    <span className="text-zinc-500">Shooting Time:</span> <span className="italic">{tier.shooting}</span>
+                  </p>
+                  <p>
+                    <span className="text-zinc-500">Travel Time:</span> <span className="italic">{tier.travel}</span>
+                  </p>
+                  <div>
+                    <p className="text-zinc-500 mb-1">Included:</p>
+                    <ul className="space-y-1">
+                      <li>The entire process</li>
+                      <li>Commercial usage rights</li>
+                      <li>Web &amp; print versions</li>
+                      <li>Post processing</li>
+                    </ul>
+                  </div>
+                  <p className="pt-3 text-5xl leading-none" style={{ fontFamily: 'var(--font-body)' }}>
+                    {tier.price}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 text-left">
           <div>
-            <h3 style={{ padding: '40px 0' }}>Optional costs</h3>
-            <ul className="space-y-3 text-zinc-300" style={{ listStyle: 'none', padding: 0 }}>
-              <li>Studio fees if required</li>
-              <li>Gear fees for rental of specialty cameras or lenses</li>
-              <li>Purchase, development & scanning of film</li>
-            </ul>
+            <h3 className="pb-4 border-b border-zinc-700 inline-block" style={{ paddingTop: 0 }}>
+              Disclaimer
+            </h3>
+            <p className="mt-4 text-zinc-300 max-w-md">
+              The amount of photos you receive is case dependent.
+              <br />
+              Expect around 3 delivered images per hour of the shoot.
+            </p>
           </div>
 
           <div>
-            <h3 style={{ padding: '40px 0' }}>All rates include</h3>
-            <ul className="space-y-3 text-zinc-300" style={{ listStyle: 'none', padding: 0 }}>
-              <li>120 minutes of travel time</li>
-              <li>The entire process</li>
-              <li>Commercial usage rights of images</li>
-              <li>Web & print ready files</li>
+            <h3 className="pb-4 border-b border-zinc-700 inline-block" style={{ paddingTop: 0 }}>
+              Optional costs
+            </h3>
+            <ul className="mt-4 space-y-2 text-zinc-300" style={{ listStyle: 'none', padding: 0 }}>
+              <li>Studio costs</li>
+              <li>Fees for specialty cameras &amp; lenses</li>
+              <li>Material, development &amp; scanning</li>
             </ul>
-            <p className="mt-8 text-zinc-500">
-              The amount of photos you receive is case dependent.
-              <br />
-              Expect no less than one final image per hour of the shoot.
-            </p>
           </div>
         </div>
       </section>

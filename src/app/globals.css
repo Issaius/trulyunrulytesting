@@ -48,6 +48,11 @@
   /* Leading */
   --leading-display: 1.05;
   --leading-body: 1.6;
+
+  /* Space above section headlines (first baseline in section) */
+  --section-headline-padding-before: 100px;
+  /* Space below section headlines — use margin so it collapses cleanly with child margins */
+  --section-headline-gap-after: 100px;
 }
 
 /* ─── Base Styles ────────────────────────────────────────────────── */
@@ -90,8 +95,12 @@ h1,
   text-transform: lowercase;
   letter-spacing: -0.01em;
   margin: 0;
-  padding-top: 200px;
-  padding-bottom: 200px;
+}
+
+/* Section opener spacing: token-driven gap to the block below (any content type) */
+.headline {
+  padding-top: var(--section-headline-padding-before);
+  margin-bottom: var(--section-headline-gap-after);
 }
 
 /* Smaller headings — Times New Roman */

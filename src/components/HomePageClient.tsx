@@ -80,21 +80,21 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
       </section>
 
       {slides.length > 0 ? (
-        <section className="w-full pb-20 overflow-hidden px-6">
+        <section className="w-full pb-10 overflow-hidden px-6">
           <div className="max-w-6xl mx-auto">
             <CoverflowSlider slides={slides} />
           </div>
         </section>
       ) : (
-        <section className="w-full pb-20 px-6 text-zinc-500">
+        <section className="w-full pb-10 px-6 text-zinc-500">
           <p className="max-w-6xl mx-auto">No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.</p>
         </section>
       )}
 
-      <section className="px-6 max-w-6xl mx-auto mb-32">
+      <section className="px-6 max-w-6xl mx-auto mb-16">
         <h2 className="headline">the process</h2>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory mt-10 w-[calc(100%+3rem)] -ml-6 px-6 md:w-full md:ml-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+3rem)] -ml-6 px-6 md:w-full md:ml-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             {
               id: 1,
@@ -142,10 +142,10 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
         </div>
       </section>
 
-      <section className="pt-0 pb-32 px-6 max-w-6xl mx-auto">
+      <section className="pt-0 pb-16 px-6 max-w-6xl mx-auto">
         <h2 className="headline">pricing</h2>
 
-        <div className="mb-16 -mt-6">
+        <div className="mb-16">
           <div className="hidden md:block max-w-5xl mx-auto overflow-x-auto">
             <table className="w-full min-w-[56rem] border-collapse text-center table-fixed">
               <colgroup>

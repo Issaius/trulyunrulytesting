@@ -74,7 +74,7 @@ export default function PortfolioPageClient() {
       </section>
 
       <section className="w-full pb-16 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-[75vw] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="aspect-square bg-zinc-900 animate-pulse rounded-lg" />

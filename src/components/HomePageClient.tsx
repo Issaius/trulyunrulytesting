@@ -80,18 +80,18 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
       </section>
 
       {slides.length > 0 ? (
-        <section className="w-full pb-10 overflow-hidden px-6">
-          <div className="max-w-6xl mx-auto">
+        <section className="w-full pb-10 px-6">
+          <div className="w-[66vw] mx-auto">
             <CoverflowSlider slides={slides} />
           </div>
         </section>
       ) : (
-        <section className="w-full pb-10 px-6 text-zinc-500">
-          <p className="max-w-6xl mx-auto">No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.</p>
+        <section className="w-full pb-10 px-6 text-zinc-400">
+          <p className="w-[66vw] mx-auto">No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.</p>
         </section>
       )}
 
-      <section className="px-6 max-w-6xl mx-auto mb-16">
+      <section className="px-6 w-[75vw] mx-auto mb-16">
         <h2 className="headline">the process</h2>
 
         <div className="flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+3rem)] -ml-6 px-6 md:w-full md:ml-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -135,18 +135,18 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
                 <h3 className="text-2xl lg:text-3xl font-serif">{step.title}</h3>
               </div>
               <div className="p-8 h-[250px]">
-                <p className="text-zinc-400 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
+                <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="pt-0 pb-16 px-6 max-w-6xl mx-auto">
+      <section className="pt-0 pb-16 px-6 w-[75vw] mx-auto">
         <h2 className="headline">pricing</h2>
 
         <div className="mb-16">
-          <div className="hidden md:block max-w-5xl mx-auto overflow-x-auto">
+          <div className="hidden md:block w-full overflow-x-auto">
             <table className="w-full min-w-[56rem] border-collapse text-center table-fixed">
               <colgroup>
                 <col className="w-[29%]" />
@@ -172,7 +172,10 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
                   { label: '1/2 Day', shooting: '4 Hours', travel: '2 Hours', price: '350€' },
                   { label: 'Full Day', shooting: '8 Hours', travel: '3 Hours', price: '700€' },
                 ].map((tier, index) => (
-                  <tr key={tier.label} className="border-b border-zinc-800">
+                  <tr
+                    key={tier.label}
+                    className="border-b border-zinc-800 last:border-b-0"
+                  >
                     <td className="py-6 align-top">
                       <h3 className="text-4xl" style={{ padding: 0 }}>
                         {tier.label}
@@ -181,8 +184,8 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
                         {tier.shooting} shooting time
                       </p>
                     </td>
-                    <td className="py-6 border-l border-zinc-800 px-2 align-middle text-[28px] whitespace-nowrap">
-                      <p className="text-zinc-300 italic">{tier.travel}</p>
+                    <td className="py-6 border-l border-zinc-800 px-2 align-middle text-[28px] whitespace-nowrap text-zinc-300 italic">
+                      {tier.travel}
                     </td>
                     {index === 0 ? (
                       <td
@@ -224,10 +227,10 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
                 <div className="mt-5 space-y-3 text-zinc-300">
                   <p className="italic">{tier.shooting} shooting time</p>
                   <p className="text-[28px]">
-                    <span className="text-zinc-500">Travel Time:</span> <span className="italic">{tier.travel}</span>
+                    <span className="text-zinc-400">Travel Time:</span> <span className="italic">{tier.travel}</span>
                   </p>
                   <div className="text-[28px]">
-                    <p className="text-zinc-500 mb-1">Included:</p>
+                    <p className="text-zinc-400 mb-1">Included:</p>
                     <ul className="space-y-1">
                       <li>The entire process</li>
                       <li>Commercial usage rights</li>

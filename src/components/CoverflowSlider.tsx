@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 export type Slide = {
@@ -10,6 +10,9 @@ export type Slide = {
     text?: string;
     /** From CMS; when set, used instead of parsing the filename from `src`. */
     title?: string;
+    /** From CMS asset metadata; optional for future use (slider uses one shared frame for stable vertical centering). */
+    width?: number;
+    height?: number;
 };
 
 interface CoverflowSliderProps {
@@ -30,6 +33,8 @@ function getFileName(src: string): string {
 
 export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [imageBandWidth, setImageBandWidth] = useState<number | null>(null);
+    const imageBlockRef = useRef<HTMLDivElement | null>(null);
 
     if (slides.length === 0) {
         return null;
@@ -45,12 +50,34 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
 
     const current = slides[currentIndex];
 
-    return (
-        <div className="relative w-full flex flex-col items-center">
+    /** Vertical budget: fixed nav + title/controls row + breathing room (slider sits below hero on home). ~12% under full budget so it stays clear of the header when scrolling. */
+    const imageMaxHeight = 'calc(0.88 * (100dvh - 13.5rem))';
 
-            {/* 3:2 landscape; reserve for title row so image + chrome ≤ 100dvh */}
-            <div className="w-full max-w-[min(100%,calc((100dvh-16rem)*3/2))] min-w-0">
-                <div className="flex flex-row justify-between items-center gap-3 md:gap-4 mb-3 md:mb-4">
+    useLayoutEffect(() => {
+        const el = imageBlockRef.current;
+        if (!el) {
+            return;
+        }
+        const update = () => {
+            setImageBandWidth(el.getBoundingClientRect().width);
+        };
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [currentIndex, current.src, current.width, current.height]);
+
+    return (
+        <div className="relative w-full flex flex-col items-center min-w-0">
+            <div className="w-full min-w-0">
+                <div
+                    className="flex flex-row justify-between items-center gap-3 md:gap-4 mb-3 md:mb-4 mx-auto w-full max-w-full min-w-0"
+                    style={
+                        imageBandWidth != null
+                            ? { width: imageBandWidth, maxWidth: '100%' }
+                            : undefined
+                    }
+                >
                     <div className="min-w-0 flex-1 text-left">
                         <h3
                             className="text-2xl lg:text-3xl font-serif mb-1 text-left"
@@ -59,7 +86,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                             {current.title?.trim() || getFileName(current.src)}
                         </h3>
                         <p
-                            className="text-zinc-500 text-left"
+                            className="text-zinc-400 text-left"
                             style={{
                                 fontFamily: 'var(--font-body)',
                                 fontSize: '28px',
@@ -92,28 +119,41 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                     </div>
                 </div>
 
-                <div className="relative w-full aspect-[3/2] bg-black min-w-0">
-                    {slides.map((slide, index) => (
-                        <div
-                            key={index}
-                            className="absolute inset-0 transition-opacity duration-700"
-                            style={{
-                                opacity: index === currentIndex ? 1 : 0,
-                                pointerEvents: index === currentIndex ? 'auto' : 'none',
-                            }}
-                        >
-                            <Image
-                                src={slide.src}
-                                alt={slide.alt}
-                                fill
-                                className="object-contain"
-                                priority={index === currentIndex}
-                            />
-                        </div>
-                    ))}
+                <div
+                    className="relative flex w-full max-w-full mx-auto aspect-[3/2] min-h-0 items-center justify-center bg-black"
+                    style={{ maxHeight: imageMaxHeight }}
+                >
+                    {slides.map((slide, index) => {
+                        const w = slide.width ?? 2400;
+                        const h = slide.height ?? 1600;
+                        return (
+                            <div
+                                key={index}
+                                className="absolute inset-0 flex items-center justify-center transition-opacity duration-700"
+                                style={{
+                                    opacity: index === currentIndex ? 1 : 0,
+                                    pointerEvents: index === currentIndex ? 'auto' : 'none',
+                                }}
+                            >
+                                <div
+                                    ref={index === currentIndex ? imageBlockRef : undefined}
+                                    className="relative w-fit max-h-full max-w-full shadow-[0_0_40px_-4px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_18px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]"
+                                >
+                                    <Image
+                                        src={slide.src}
+                                        alt={slide.alt}
+                                        width={w}
+                                        height={h}
+                                        className="block h-auto w-auto max-h-full max-w-full object-contain"
+                                        priority={index === currentIndex}
+                                        sizes="75vw"
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
-
         </div>
     );
 }

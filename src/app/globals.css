@@ -135,3 +135,110 @@ p {
   font-size: var(--text-body);
   line-height: var(--leading-body);
 }
+
+/* Process section: range with scissors thumb; dashed line only trails to the right of the thumb */
+.process-cut-slider-wrap {
+  --process-thumb-w: 13.2rem;
+  /* 50% larger than 8.8rem */
+  /* Width / horizontal inset: set on the element (inline) so it wins over Tailwind */
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* No scroll-smooth: scrubber uses behavior:auto so content stays locked to the thumb */
+.process-steps-strip {
+  scroll-behavior: auto;
+}
+
+.process-steps-strip-track {
+  display: flex;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+/* Pattern fixed in the wrap; cover hides the left segment. Track ends where the thumb
+   center sits at max, so no dashes remain past the scissors at the end position. */
+.process-cut-line-track {
+  position: absolute;
+  left: 0;
+  width: calc(100% - var(--process-thumb-w) / 2);
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  /* Equal dash and gap (14px each); full cycle 28px */
+  background: repeating-linear-gradient(
+    to right,
+    #ffffff 0 14px,
+    transparent 14px 28px
+  );
+  pointer-events: none;
+}
+
+.process-cut-line-cover {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  width: calc(
+    (var(--process-pct) / 100) * (100% - var(--process-thumb-w)) + (var(--process-thumb-w) / 2)
+  );
+  background: var(--background);
+  pointer-events: none;
+}
+
+.process-cut-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: var(--process-thumb-w);
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.process-cut-slider:focus {
+  outline: none;
+}
+
+.process-cut-slider:focus-visible {
+  outline: 2px solid rgb(161 161 170);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.process-cut-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: transparent;
+  border: none;
+}
+
+.process-cut-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--process-thumb-w);
+  height: var(--process-thumb-w);
+  margin-top: calc((2px - var(--process-thumb-w)) / 2);
+  border: none;
+  border-radius: 0;
+  background: url("/process-scissors-thumb.png") no-repeat center;
+  background-size: contain;
+  cursor: ew-resize;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.45));
+}
+
+.process-cut-slider::-moz-range-track {
+  height: 2px;
+  background: transparent;
+  border: none;
+}
+
+.process-cut-slider::-moz-range-thumb {
+  width: var(--process-thumb-w);
+  height: var(--process-thumb-w);
+  border: none;
+  border-radius: 0;
+  background: url("/process-scissors-thumb.png") no-repeat center;
+  background-size: contain;
+  cursor: ew-resize;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.45));
+}

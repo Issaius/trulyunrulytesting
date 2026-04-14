@@ -14,7 +14,10 @@ const structure: StructureResolver = (S) =>
     .title('Content')
     .items([
       S.listItem().title('Home Slider').child(S.documentTypeList('homeSlider').title('Home Slider')),
-      ...S.documentTypeListItems().filter((item) => item.getId() !== 'homeSlider'),
+      S.listItem().title('Portfolio').child(S.documentTypeList('portfolio').title('Portfolio')),
+      ...S.documentTypeListItems().filter(
+        (item) => item.getId() !== 'homeSlider' && item.getId() !== 'portfolio',
+      ),
     ]);
 
 export default defineConfig({

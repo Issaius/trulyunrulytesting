@@ -83,3 +83,80 @@ export async function getHomeSliderSlides(): Promise<HomeSliderSlide[]> {
 
   return out;
 }
+
+export type PortfolioGalleryImage = {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+};
+
+const PORTFOLIO_QUERY = groq`
+  *[_type == "portfolio"] | order(_updatedAt desc)[0]{
+    intro,
+    images[]{
+      image{
+        ...,
+        asset->{
+          ...,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      },
+      caption
+    }
+  }
+`;
+
+export async function getPortfolioPage(): Promise<{
+  intro: string;
+  images: PortfolioGalleryImage[];
+}> {
+  if (!client) {
+    return { intro: '', images: [] };
+  }
+
+  const data = await client.fetch<{
+    intro?: string | null;
+    images?: Array<{
+      image?: SanityImageSource & {
+        asset?: {
+          metadata?: { dimensions?: { width?: number; height?: number } | null } | null;
+        } | null;
+      };
+      caption?: string | null;
+    }> | null;
+  } | null>(PORTFOLIO_QUERY);
+
+  if (!data?.images?.length) {
+    return { intro: data?.intro?.trim() ?? '', images: [] };
+  }
+
+  const images: PortfolioGalleryImage[] = [];
+
+  for (const row of data.images) {
+    if (!row?.image) continue;
+    const src = urlFor(row.image).width(2000).quality(90).url();
+    const caption = row.caption?.trim() ?? '';
+    const dims = row.image?.asset?.metadata?.dimensions;
+    const w = dims?.width;
+    const h = dims?.height;
+
+    images.push({
+      src,
+      alt: caption || 'Portfolio image',
+      ...(typeof w === 'number' && typeof h === 'number' && w > 0 && h > 0
+        ? { width: w, height: h }
+        : {}),
+    });
+  }
+
+  return {
+    intro: data.intro?.trim() ?? '',
+    images,
+  };
+}

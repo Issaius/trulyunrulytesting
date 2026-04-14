@@ -1,13 +1,7 @@
 import PortfolioPageClient from '@/components/PortfolioPageClient';
-
-async function getImages() {
-  // fetching all documents of type "post" or "image" - adjusting this later when we know the schema
-  // for now, just returning empty to prevent errors
-  return [];
-}
+import { getPortfolioPage } from '@/lib/sanity-queries';
 
 export default async function Portfolio() {
-  await getImages();
-
-  return <PortfolioPageClient />;
+  const { intro, images } = await getPortfolioPage();
+  return <PortfolioPageClient intro={intro} images={images} />;
 }

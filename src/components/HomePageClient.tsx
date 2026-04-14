@@ -1,6 +1,15 @@
 'use client';
 
-import { useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+  type FormEvent,
+} from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import CoverflowSlider from './CoverflowSlider';
@@ -14,6 +23,11 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
   const container = useRef(null);
   const h1Ref = useRef(null);
   const sliderRef = useRef(null);
+  const processStripRef = useRef<HTMLDivElement>(null);
+  const syncingScrollFromSlider = useRef(false);
+  const scrollSyncUnlockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [processScrubPct, setProcessScrubPct] = useState(0);
+  const [processStripInset, setProcessStripInset] = useState({ pl: 0, pr: 0 });
 
   const sliderWords = [
     'artisans',
@@ -56,6 +70,122 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
     { scope: container },
   );
 
+  const releaseProcessScrollSyncLock = useCallback(() => {
+    syncingScrollFromSlider.current = false;
+    if (scrollSyncUnlockTimer.current !== null) {
+      clearTimeout(scrollSyncUnlockTimer.current);
+      scrollSyncUnlockTimer.current = null;
+    }
+  }, []);
+
+  const applyProcessStripScroll = useCallback(
+    (pct: number) => {
+      const el = processStripRef.current;
+      if (!el) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) {
+        releaseProcessScrollSyncLock();
+        return;
+      }
+
+      syncingScrollFromSlider.current = true;
+      if (scrollSyncUnlockTimer.current !== null) {
+        clearTimeout(scrollSyncUnlockTimer.current);
+      }
+
+      el.scrollTo({ left: (pct / 100) * max, behavior: 'auto' });
+
+      const onScrollEnd = () => {
+        el.removeEventListener('scrollend', onScrollEnd);
+        releaseProcessScrollSyncLock();
+      };
+      el.addEventListener('scrollend', onScrollEnd, { passive: true });
+
+      scrollSyncUnlockTimer.current = setTimeout(() => {
+        el.removeEventListener('scrollend', onScrollEnd);
+        releaseProcessScrollSyncLock();
+      }, 900);
+    },
+    [releaseProcessScrollSyncLock],
+  );
+
+  const applyProcessPct = (v: number) => {
+    setProcessScrubPct(v);
+    applyProcessStripScroll(v);
+  };
+
+  const updateProcessStripInset = useCallback(() => {
+    const strip = processStripRef.current;
+    if (!strip) return;
+    const cards = strip.querySelectorAll<HTMLElement>('.process-step-card');
+    const first = cards[0];
+    if (!first) {
+      setProcessStripInset((p) => (p.pl === 0 && p.pr === 0 ? p : { pl: 0, pr: 0 }));
+      return;
+    }
+    const w = strip.clientWidth;
+    const firstW = first.offsetWidth;
+    const last = cards[cards.length - 1];
+    const lastW = last?.offsetWidth ?? firstW;
+    const pl = Math.max(0, (w - firstW) / 2);
+    const pr = Math.max(0, (w - lastW) / 2);
+    setProcessStripInset((prev) =>
+      prev.pl === pl && prev.pr === pr ? prev : { pl, pr },
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    updateProcessStripInset();
+    const strip = processStripRef.current;
+    if (!strip) return;
+    const ro = new ResizeObserver(updateProcessStripInset);
+    ro.observe(strip);
+    strip.querySelectorAll('.process-step-card').forEach((node) => ro.observe(node));
+    return () => ro.disconnect();
+  }, [updateProcessStripInset]);
+
+  const onProcessScrubChange = (e: ChangeEvent<HTMLInputElement>) => {
+    applyProcessPct(Number(e.target.value));
+  };
+
+  const onProcessScrubNativeInput = (e: FormEvent<HTMLInputElement>) => {
+    applyProcessPct(Number(e.currentTarget.value));
+  };
+
+  useEffect(() => {
+    const el = processStripRef.current;
+    if (!el) return;
+
+    const syncFromScroll = () => {
+      if (syncingScrollFromSlider.current) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) {
+        setProcessScrubPct(0);
+        return;
+      }
+      setProcessScrubPct((el.scrollLeft / max) * 100);
+    };
+
+    el.addEventListener('scroll', syncFromScroll, { passive: true });
+    const ro = new ResizeObserver(syncFromScroll);
+    ro.observe(el);
+    syncFromScroll();
+
+    return () => {
+      el.removeEventListener('scroll', syncFromScroll);
+      ro.disconnect();
+    };
+  }, [processStripInset]);
+
+  useEffect(
+    () => () => {
+      if (scrollSyncUnlockTimer.current !== null) {
+        clearTimeout(scrollSyncUnlockTimer.current);
+      }
+    },
+    [],
+  );
+
   return (
     <main ref={container} style={{ textAlign: 'center' }}>
       <section className="min-h-screen flex flex-col items-center justify-center px-6">
@@ -94,7 +224,52 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
       <section className="px-6 w-[75vw] mx-auto mb-16">
         <h2 className="headline">the process</h2>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+3rem)] -ml-6 px-6 md:w-full md:ml-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Same horizontal frame as the strip so scissors travel matches scroll extent */}
+        <div className="w-[calc(100%+3rem)] -ml-6 md:w-full md:ml-0">
+          <div className="px-6 md:px-0">
+            {/* Full-width row + justify-center so the shorter track is truly centered (margin:auto is brittle here) */}
+            <div className="flex w-full justify-center mb-0">
+              <div
+                className="process-cut-slider-wrap relative flex min-h-[var(--process-thumb-w)] items-center min-w-0"
+                style={
+                  {
+                    '--process-pct': processScrubPct,
+                    /* Shorter track: 10 dash cycles inset; min() caps to parent so 100% resolves correctly */
+                    width:
+                      'min(100%, max(10rem, calc(100% - 280px)))',
+                  } as CSSProperties
+                }
+              >
+                <div className="process-cut-line-track" aria-hidden />
+                <div className="process-cut-line-cover" aria-hidden />
+                <label className="sr-only" htmlFor="process-cut-slider">
+                  Scroll through process steps
+                </label>
+                <input
+                  id="process-cut-slider"
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={0.01}
+                  value={processScrubPct}
+                  onChange={onProcessScrubChange}
+                  onInput={onProcessScrubNativeInput}
+                  className="process-cut-slider relative z-10 min-w-0 w-full flex-1"
+                />
+              </div>
+            </div>
+
+            <div
+              ref={processStripRef}
+              className="process-steps-strip overflow-x-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              <div
+                className="process-steps-strip-track"
+                style={{
+                  paddingLeft: processStripInset.pl,
+                  paddingRight: processStripInset.pr,
+                }}
+              >
           {[
             {
               id: 1,
@@ -129,7 +304,7 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
           ].map((step) => (
             <div
               key={step.id}
-              className="flex-shrink-0 snap-start flex flex-col min-w-[300px] w-[85vw] sm:w-[50vw] md:w-[350px] border-r-2 border-zinc-700 last:border-r-0"
+              className="process-step-card flex-shrink-0 flex flex-col min-w-[300px] w-[85vw] sm:w-[50vw] md:w-[350px]"
             >
               <div className="flex flex-col justify-end h-[120px] px-8 pb-6 border-b-2 border-zinc-700">
                 <h3 className="text-2xl lg:text-3xl font-serif">{step.title}</h3>
@@ -139,6 +314,9 @@ export default function HomePageClient({ slides }: HomePageClientProps) {
               </div>
             </div>
           ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

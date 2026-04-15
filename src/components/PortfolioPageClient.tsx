@@ -7,6 +7,8 @@ import gsap from 'gsap';
 
 import type { PortfolioGalleryImage } from '@/lib/sanity-queries';
 
+import PhotoLightbox from './PhotoLightbox';
+
 const MOBILE_MQ = '(max-width: 767px)';
 
 function subscribeMobileMasonry(cb: () => void) {
@@ -41,6 +43,8 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
   const galleryItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gallerySectionRef = useRef<HTMLElement | null>(null);
   const [centeredGalleryIndex, setCenteredGalleryIndex] = useState<number | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isMobileMasonry = useSyncExternalStore(
     subscribeMobileMasonry,
@@ -199,7 +203,15 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
                   .join(' ')}
               >
                 <figure className="overflow-hidden bg-zinc-900/40">
-                  <div className="relative w-full">
+                  <button
+                    type="button"
+                    className="relative block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
+                    aria-label={`Open image ${i + 1} in viewer`}
+                    onClick={() => {
+                      setLightboxIndex(i);
+                      setLightboxOpen(true);
+                    }}
+                  >
                     <Image
                       src={item.src}
                       alt={item.alt}
@@ -209,13 +221,21 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
                       className="w-full h-auto object-cover align-bottom"
                       loading={i < 6 ? 'eager' : 'lazy'}
                     />
-                  </div>
+                  </button>
                 </figure>
               </div>
             ))}
           </div>
         )}
       </section>
+
+      <PhotoLightbox
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={images}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+      />
     </main>
   );
 }

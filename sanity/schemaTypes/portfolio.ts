@@ -30,16 +30,22 @@ export const portfolio = defineType({
               validation: (Rule) => Rule.required(),
             }),
             defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              description: 'Optional image title (same as Home Slider).',
+            }),
+            defineField({
               name: 'caption',
               title: 'Caption',
               type: 'string',
-              description: 'Alt text and optional label.',
+              description: 'Caption and image alt text (same as Home Slider).',
             }),
           ],
           preview: {
-            select: { title: 'caption', media: 'image' },
-            prepare({ title, media }) {
-              return { title: title || 'Image', media };
+            select: { title: 'title', subtitle: 'caption', media: 'image' },
+            prepare({ title, subtitle, media }) {
+              return { title: title || subtitle || 'Image', subtitle, media };
             },
           },
         },

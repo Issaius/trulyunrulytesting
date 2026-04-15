@@ -3,6 +3,8 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
+import PhotoLightbox from './PhotoLightbox';
+
 export type Slide = {
     src: string;
     alt: string;
@@ -33,6 +35,7 @@ function getFileName(src: string): string {
 
 export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
     const [imageBandWidth, setImageBandWidth] = useState<number | null>(null);
     const imageBlockRef = useRef<HTMLDivElement | null>(null);
 
@@ -139,21 +142,39 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                                     ref={index === currentIndex ? imageBlockRef : undefined}
                                     className="relative w-fit max-h-full max-w-full shadow-[0_0_40px_-4px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_18px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]"
                                 >
-                                    <Image
-                                        src={slide.src}
-                                        alt={slide.alt}
-                                        width={w}
-                                        height={h}
-                                        className="block h-auto w-auto max-h-full max-w-full object-contain"
-                                        priority={index === currentIndex}
-                                        sizes="75vw"
-                                    />
+                                    <button
+                                        type="button"
+                                        className="block w-full cursor-zoom-in border-0 bg-transparent p-0"
+                                        aria-label="Open image full screen"
+                                        onClick={() => {
+                                            setCurrentIndex(index);
+                                            setLightboxOpen(true);
+                                        }}
+                                    >
+                                        <Image
+                                            src={slide.src}
+                                            alt={slide.alt}
+                                            width={w}
+                                            height={h}
+                                            className="block h-auto w-auto max-h-full max-w-full object-contain"
+                                            priority={index === currentIndex}
+                                            sizes="75vw"
+                                        />
+                                    </button>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
+
+            <PhotoLightbox
+                open={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+                images={slides}
+                index={currentIndex}
+                onIndexChange={setCurrentIndex}
+            />
         </div>
     );
 }

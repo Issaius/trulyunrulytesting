@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -31,75 +31,40 @@ const GALLERY_SHADOW =
 const GALLERY_SHADOW_HOVER =
   'md:hover:shadow-[0_0_53px_-6px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_24px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]';
 
-type PortfolioPageClientProps = {
-  intro: string;
-  images: PortfolioGalleryImage[];
-};
+const SLIDER_WORDS = [
+  'artisans',
+  'artists',
+  'extraordinaires',
+  'tattoo artists',
+  'people who care',
+  'drug dealers',
+  'outcasts',
+  'dissidents',
+  'felons',
+] as const;
 
-export default function PortfolioPageClient({ intro, images }: PortfolioPageClientProps) {
-  const container = useRef(null);
-  const h1Ref = useRef(null);
-  const sliderRef = useRef(null);
-  const galleryItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const gallerySectionRef = useRef<HTMLElement | null>(null);
-  const [centeredGalleryIndex, setCenteredGalleryIndex] = useState<number | null>(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+const SLIDER_DISPLAY_WORDS = [...SLIDER_WORDS, SLIDER_WORDS[0]];
 
-  const isMobileMasonry = useSyncExternalStore(
-    subscribeMobileMasonry,
-    getMobileMasonrySnapshot,
-    getServerMobileMasonrySnapshot,
-  );
+function galleryShellClassName(isMobileMasonry: boolean, isCentered: boolean): string {
+  const base =
+    'mb-4 sm:mb-5 break-inside-avoid transition-shadow duration-[675ms] ease-out shadow-none';
+  if (isMobileMasonry) {
+    return isCentered ? `${base} ${GALLERY_SHADOW}` : base;
+  }
+  return `${base} ${GALLERY_SHADOW_HOVER}`;
+}
 
-  const sliderWords = [
-    'artisans',
-    'artists',
-    'extraordinaires',
-    'tattoo artists',
-    'people who care',
-    'drug dealers',
-    'outcasts',
-    'dissidents',
-    'felons',
-  ];
-  const displayWords = [...sliderWords, sliderWords[0]];
-
-  useGSAP(
-    () => {
-      gsap.from(h1Ref.current, {
-        y: 80,
-        opacity: 0,
-        duration: 1,
-        ease: 'power4.out',
-        delay: 0.3,
-      });
-
-      const totalWords = sliderWords.length;
-      const tl = gsap.timeline({ repeat: -1 });
-
-      for (let i = 1; i < totalWords; i++) {
-        tl.to(
-          sliderRef.current,
-          {
-            yPercent: -(i * (100 / (totalWords + 1))),
-            duration: 0.6,
-            ease: 'power3.inOut',
-          },
-          '+=1.5',
-        );
-      }
-    },
-    { scope: container },
-  );
+function useCenteredMasonryIndex(isMobileMasonry: boolean, imageCount: number) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [internalCenteredIndex, setInternalCenteredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    galleryItemRefs.current = galleryItemRefs.current.slice(0, images.length);
-  }, [images.length]);
+    itemRefs.current = itemRefs.current.slice(0, imageCount);
+  }, [imageCount]);
 
   useEffect(() => {
-    if (!isMobileMasonry || images.length === 0) {
-      setCenteredGalleryIndex(null);
+    if (!isMobileMasonry || imageCount === 0) {
       return;
     }
 
@@ -114,7 +79,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
         let bestIdx = -1;
         let bestDist = Infinity;
 
-        galleryItemRefs.current.forEach((el, idx) => {
+        itemRefs.current.forEach((el, idx) => {
           if (!el) return;
           const r = el.getBoundingClientRect();
           const cx = r.left + r.width / 2;
@@ -126,7 +91,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
           }
         });
 
-        setCenteredGalleryIndex(bestIdx >= 0 ? bestIdx : null);
+        setInternalCenteredIndex(bestIdx >= 0 ? bestIdx : null);
       });
     };
 
@@ -135,7 +100,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
     window.addEventListener('scroll', updateCentered, { passive: true, capture: true });
     window.addEventListener('resize', updateCentered);
 
-    const section = gallerySectionRef.current;
+    const section = sectionRef.current;
     const ro = new ResizeObserver(updateCentered);
     if (section) ro.observe(section);
 
@@ -145,20 +110,179 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
       ro.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isMobileMasonry, images.length]);
+  }, [isMobileMasonry, imageCount]);
+
+  const registerItemRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    itemRefs.current[index] = el;
+  }, []);
+
+  const centeredIndex =
+    isMobileMasonry && imageCount > 0 ? internalCenteredIndex : null;
+
+  return { sectionRef, registerItemRef, centeredIndex };
+}
+
+type PortfolioPageClientProps = {
+  intro: string;
+  images: PortfolioGalleryImage[];
+};
+
+type PortfolioGalleryCellProps = {
+  item: PortfolioGalleryImage;
+  index: number;
+  isMobileMasonry: boolean;
+  isCentered: boolean;
+  registerItemRef: (index: number, el: HTMLDivElement | null) => void;
+  onOpen: (index: number) => void;
+};
+
+const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
+  item,
+  index,
+  isMobileMasonry,
+  isCentered,
+  registerItemRef,
+  onOpen,
+}: PortfolioGalleryCellProps) {
+  return (
+    <div
+      ref={(el) => registerItemRef(index, el)}
+      className={galleryShellClassName(isMobileMasonry, isCentered)}
+    >
+      <figure className="overflow-hidden bg-zinc-900/40">
+        <button
+          type="button"
+          className="relative block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
+          aria-label={`Open image ${index + 1} in viewer`}
+          onClick={() => onOpen(index)}
+        >
+          <Image
+            src={item.src}
+            alt={item.alt}
+            width={item.width ?? 1200}
+            height={item.height ?? 1600}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            className="w-full h-auto object-cover align-bottom"
+            loading={index < 6 ? 'eager' : 'lazy'}
+          />
+        </button>
+      </figure>
+    </div>
+  );
+});
+
+export default function PortfolioPageClient({ intro, images }: PortfolioPageClientProps) {
+  const container = useRef(null);
+  const h1Ref = useRef(null);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const isMobileMasonry = useSyncExternalStore(
+    subscribeMobileMasonry,
+    getMobileMasonrySnapshot,
+    getServerMobileMasonrySnapshot,
+  );
+
+  const { sectionRef: gallerySectionRef, registerItemRef, centeredIndex: centeredGalleryIndex } =
+    useCenteredMasonryIndex(isMobileMasonry, images.length);
+
+  const openLightbox = useCallback((index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxOpen(false);
+  }, []);
+
+  useGSAP(
+    () => {
+      gsap.from(h1Ref.current, {
+        y: 80,
+        opacity: 0,
+        duration: 1,
+        ease: 'power4.out',
+        delay: 0.3,
+      });
+
+      const track = sliderRef.current;
+      if (!track) return;
+
+      const totalWords = SLIDER_WORDS.length;
+      let tl: gsap.core.Timeline | null = null;
+
+      const killSlider = () => {
+        tl?.kill();
+        tl = null;
+        gsap.killTweensOf(track);
+      };
+
+      let lastRowPx = -1;
+      const buildSlider = () => {
+        const firstRow = track.firstElementChild as HTMLElement | null;
+        const rowPx = firstRow?.getBoundingClientRect().height ?? 0;
+        if (rowPx < 1) return;
+        if (tl && Math.abs(rowPx - lastRowPx) < 0.5) return;
+        lastRowPx = rowPx;
+
+        killSlider();
+        gsap.set(track, { y: 0, yPercent: 0 });
+
+        const nextTl = gsap.timeline({ repeat: -1 });
+        for (let k = 1; k <= totalWords; k++) {
+          nextTl.to(
+            track,
+            {
+              y: -k * rowPx,
+              duration: 0.6,
+              ease: 'power3.inOut',
+              force3D: true,
+            },
+            '+=1.5',
+          );
+        }
+        nextTl.set(track, { y: 0 });
+        tl = nextTl;
+      };
+
+      buildSlider();
+
+      const firstRow = track.firstElementChild as HTMLElement | null;
+      const ro =
+        firstRow &&
+        new ResizeObserver(() => {
+          buildSlider();
+        });
+      if (firstRow && ro) ro.observe(firstRow);
+
+      let alive = true;
+      void document.fonts.ready.then(() => {
+        if (alive) buildSlider();
+      });
+
+      return () => {
+        alive = false;
+        ro?.disconnect();
+        killSlider();
+        gsap.set(track, { y: 0, yPercent: 0 });
+      };
+    },
+    { scope: container },
+  );
 
   return (
-    <main ref={container} style={{ textAlign: 'center' }}>
+    <main ref={container} className="text-center">
       <section className="min-h-screen flex flex-col items-center justify-center px-6">
-        <h1 ref={h1Ref} className="normal-case" style={{ padding: 0 }}>
+        <h1 ref={h1Ref} className="normal-case p-0">
           The Work
         </h1>
 
-        <div className="mt-8 text-2xl font-body italic text-zinc-400 flex items-center justify-center gap-2 max-w-full">
+        <div className="mt-8 text-[calc(1.5rem+4px)] font-body italic text-zinc-400 flex items-center justify-center gap-2 max-w-full">
           <span>for:</span>
           <div className="h-[1.5em] overflow-hidden text-left relative">
             <div ref={sliderRef} className="flex flex-col">
-              {displayWords.map((word, i) => (
+              {SLIDER_DISPLAY_WORDS.map((word, i) => (
                 <span key={i} className="h-[1.5em] flex items-center whitespace-nowrap">
                   {word}
                 </span>
@@ -186,44 +310,15 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5 [column-fill:_balance]">
             {images.map((item, i) => (
-              <div
+              <PortfolioGalleryCell
                 key={`${item.src}-${i}`}
-                ref={(el) => {
-                  galleryItemRefs.current[i] = el;
-                }}
-                className={[
-                  'mb-4 sm:mb-5 break-inside-avoid transition-shadow duration-[675ms] ease-out shadow-none',
-                  isMobileMasonry
-                    ? centeredGalleryIndex === i
-                      ? GALLERY_SHADOW
-                      : ''
-                    : GALLERY_SHADOW_HOVER,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <figure className="overflow-hidden bg-zinc-900/40">
-                  <button
-                    type="button"
-                    className="relative block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
-                    aria-label={`Open image ${i + 1} in viewer`}
-                    onClick={() => {
-                      setLightboxIndex(i);
-                      setLightboxOpen(true);
-                    }}
-                  >
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={item.width ?? 1200}
-                      height={item.height ?? 1600}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                      className="w-full h-auto object-cover align-bottom"
-                      loading={i < 6 ? 'eager' : 'lazy'}
-                    />
-                  </button>
-                </figure>
-              </div>
+                item={item}
+                index={i}
+                isMobileMasonry={isMobileMasonry}
+                isCentered={centeredGalleryIndex === i}
+                registerItemRef={registerItemRef}
+                onOpen={openLightbox}
+              />
             ))}
           </div>
         )}
@@ -231,7 +326,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
       <PhotoLightbox
         open={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
+        onClose={closeLightbox}
         images={images}
         index={lightboxIndex}
         onIndexChange={setLightboxIndex}

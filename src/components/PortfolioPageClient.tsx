@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
+import { GALLERY_SHADOW, GALLERY_SHADOW_HOVER } from '@/lib/gallery-shadow';
 import type { PortfolioGalleryImage } from '@/lib/sanity-queries';
-
-import PhotoLightbox from './PhotoLightbox';
+import { useLightbox } from '@/components/lightbox/LightboxProvider';
 
 const MOBILE_MQ = '(max-width: 767px)';
 
@@ -24,12 +24,6 @@ function getMobileMasonrySnapshot() {
 function getServerMobileMasonrySnapshot() {
   return false;
 }
-
-/** Same glow as desktop hover; duplicate literals so Tailwind always scans full class names. */
-const GALLERY_SHADOW =
-  'shadow-[0_0_53px_-6px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_24px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]';
-const GALLERY_SHADOW_HOVER =
-  'md:hover:shadow-[0_0_53px_-6px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_24px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]';
 
 const SLIDER_WORDS = [
   'artisans',
@@ -133,7 +127,7 @@ type PortfolioGalleryCellProps = {
   isMobileMasonry: boolean;
   isCentered: boolean;
   registerItemRef: (index: number, el: HTMLDivElement | null) => void;
-  onOpen: (index: number) => void;
+  onOpen: () => void;
 };
 
 const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
@@ -149,13 +143,13 @@ const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
       ref={(el) => registerItemRef(index, el)}
       className={galleryShellClassName(isMobileMasonry, isCentered)}
     >
-      <figure className="overflow-hidden bg-zinc-900/40">
-        <button
-          type="button"
-          className="relative block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
-          aria-label={`Open image ${index + 1} in viewer`}
-          onClick={() => onOpen(index)}
-        >
+      <button
+        type="button"
+        className="block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
+        onClick={onOpen}
+        aria-label={`Open image ${index + 1} in viewer`}
+      >
+        <figure className="overflow-hidden bg-zinc-900/40">
           <Image
             src={item.src}
             alt={item.alt}
@@ -165,8 +159,8 @@ const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
             className="w-full h-auto object-cover align-bottom"
             loading={index < 6 ? 'eager' : 'lazy'}
           />
-        </button>
-      </figure>
+        </figure>
+      </button>
     </div>
   );
 });
@@ -175,8 +169,6 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
   const container = useRef(null);
   const h1Ref = useRef(null);
   const sliderRef = useRef<HTMLDivElement | null>(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isMobileMasonry = useSyncExternalStore(
     subscribeMobileMasonry,
@@ -187,14 +179,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
   const { sectionRef: gallerySectionRef, registerItemRef, centeredIndex: centeredGalleryIndex } =
     useCenteredMasonryIndex(isMobileMasonry, images.length);
 
-  const openLightbox = useCallback((index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
-  }, []);
-
-  const closeLightbox = useCallback(() => {
-    setLightboxOpen(false);
-  }, []);
+  const { open: openLightbox } = useLightbox();
 
   useGSAP(
     () => {
@@ -317,20 +302,12 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
                 isMobileMasonry={isMobileMasonry}
                 isCentered={centeredGalleryIndex === i}
                 registerItemRef={registerItemRef}
-                onOpen={openLightbox}
+                onOpen={() => openLightbox(images, i)}
               />
             ))}
           </div>
         )}
       </section>
-
-      <PhotoLightbox
-        open={lightboxOpen}
-        onClose={closeLightbox}
-        images={images}
-        index={lightboxIndex}
-        onIndexChange={setLightboxIndex}
-      />
     </main>
   );
 }

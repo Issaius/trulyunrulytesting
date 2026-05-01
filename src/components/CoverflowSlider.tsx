@@ -3,15 +3,18 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-import PhotoLightbox from './PhotoLightbox';
+import { GALLERY_SHADOW } from '@/lib/gallery-shadow';
+import { getFileNameFromSrc } from '@/lib/image-filename';
+import { renderSanityRichText, richTextToPlainText, type SanityRichText } from '@/lib/sanity-richtext';
+import { useLightbox } from '@/components/lightbox/LightboxProvider';
 
 export type Slide = {
     src: string;
     alt: string;
-    /** Legacy / unused in UI; kept for compatibility. */
-    text?: string;
-    /** From CMS; when set, used instead of parsing the filename from `src`. */
-    title?: string;
+    /** Optional rich CMS title. */
+    title?: SanityRichText;
+    /** Optional rich CMS caption. */
+    caption?: SanityRichText;
     /** From CMS asset metadata; optional for future use (slider uses one shared frame for stable vertical centering). */
     width?: number;
     height?: number;
@@ -21,27 +24,13 @@ interface CoverflowSliderProps {
     slides: Slide[];
 }
 
-/** Extract a readable label from a URL path (local or Sanity CDN). */
-function getFileName(src: string): string {
-    try {
-        const path = new URL(src).pathname;
-        const file = path.split('/').pop() ?? '';
-        return file.replace(/\.[^/.]+$/, '') || 'slide';
-    } catch {
-        const file = src.split('/').pop()?.split('?')[0] ?? '';
-        return file.replace(/\.[^/.]+$/, '') || 'slide';
-    }
-}
-
 export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [lightboxOpen, setLightboxOpen] = useState(false);
     const [imageBandWidth, setImageBandWidth] = useState<number | null>(null);
-    const imageBlockRef = useRef<HTMLDivElement | null>(null);
-
-    if (slides.length === 0) {
-        return null;
-    }
+    const imageBlockRef = useRef<HTMLButtonElement | null>(null);
+    const { open: openLightbox } = useLightbox();
+    const captionFontSizePx = Math.round(28 * 0.8);
+    const titleFontSizePx = Math.round(captionFontSizePx * 1.5);
 
     const nextSlide = () => {
         setCurrentIndex((prev) => (prev + 1) % slides.length);
@@ -52,11 +41,16 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     };
 
     const current = slides[currentIndex];
+    const titlePlain = richTextToPlainText(current.title);
+    const captionPlain = richTextToPlainText(current.caption);
 
-    /** Vertical budget: fixed nav + title/controls row + breathing room (slider sits below hero on home). ~12% under full budget so it stays clear of the header when scrolling. */
-    const imageMaxHeight = 'calc(0.88 * (100dvh - 13.5rem))';
+    /** Keep the frame contained on large desktop screens. */
+    const imageMaxHeight = 'min(72dvh, 760px)';
 
     useLayoutEffect(() => {
+        if (slides.length === 0) {
+            return;
+        }
         const el = imageBlockRef.current;
         if (!el) {
             return;
@@ -68,7 +62,11 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
         const ro = new ResizeObserver(update);
         ro.observe(el);
         return () => ro.disconnect();
-    }, [currentIndex, current.src, current.width, current.height]);
+    }, [slides.length, currentIndex, current?.src, current?.width, current?.height]);
+
+    if (slides.length === 0) {
+        return null;
+    }
 
     return (
         <div className="relative w-full flex flex-col items-center min-w-0">
@@ -82,21 +80,21 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                     }
                 >
                     <div className="min-w-0 flex-1 text-left">
-                        <h3
-                            className="text-2xl lg:text-3xl font-serif mb-1 text-left"
-                            style={{ padding: 0 }}
+                        <div
+                            className="text-2xl lg:text-3xl font-body mb-1 text-left"
+                            style={{ padding: 0, fontSize: `${titleFontSizePx}px`, fontWeight: 700 }}
                         >
-                            {current.title?.trim() || getFileName(current.src)}
-                        </h3>
-                        <p
+                            {titlePlain ? renderSanityRichText(current.title) : getFileNameFromSrc(current.src)}
+                        </div>
+                        <div
                             className="text-zinc-400 text-left"
                             style={{
                                 fontFamily: 'var(--font-body)',
-                                fontSize: '28px',
+                                fontSize: `${captionFontSizePx}px`,
                             }}
                         >
-                            {current.alt}
-                        </p>
+                            {captionPlain ? renderSanityRichText(current.caption) : current.alt}
+                        </div>
                     </div>
                     <div className="flex flex-shrink-0 items-center gap-2">
                         <button
@@ -123,7 +121,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                 </div>
 
                 <div
-                    className="relative flex w-full max-w-full mx-auto aspect-[3/2] min-h-0 items-center justify-center bg-black"
+                    className="relative mx-auto flex w-full max-w-full min-h-0 aspect-[3/2] items-center justify-center overflow-hidden bg-black"
                     style={{ maxHeight: imageMaxHeight }}
                 >
                     {slides.map((slide, index) => {
@@ -138,43 +136,28 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                                     pointerEvents: index === currentIndex ? 'auto' : 'none',
                                 }}
                             >
-                                <div
+                                <button
+                                    type="button"
                                     ref={index === currentIndex ? imageBlockRef : undefined}
-                                    className="relative w-fit max-h-full max-w-full shadow-[0_0_40px_-4px_color-mix(in_oklab,var(--color-zinc-400)_35%,transparent),0_0_18px_-2px_color-mix(in_oklab,var(--color-zinc-400)_22%,transparent)]"
+                                    className={`relative w-fit max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer ${GALLERY_SHADOW}`}
+                                    onClick={() => openLightbox(slides, currentIndex)}
+                                    aria-label="Open image in full viewer"
                                 >
-                                    <button
-                                        type="button"
-                                        className="block w-full cursor-zoom-in border-0 bg-transparent p-0"
-                                        aria-label="Open image full screen"
-                                        onClick={() => {
-                                            setCurrentIndex(index);
-                                            setLightboxOpen(true);
-                                        }}
-                                    >
-                                        <Image
-                                            src={slide.src}
-                                            alt={slide.alt}
-                                            width={w}
-                                            height={h}
-                                            className="block h-auto w-auto max-h-full max-w-full object-contain"
-                                            priority={index === currentIndex}
-                                            sizes="75vw"
-                                        />
-                                    </button>
-                                </div>
+                                    <Image
+                                        src={slide.src}
+                                        alt={slide.alt}
+                                        width={w}
+                                        height={h}
+                                        className="block h-auto w-auto max-h-full max-w-full object-contain"
+                                        priority={index === currentIndex}
+                                        sizes="75vw"
+                                    />
+                                </button>
                             </div>
                         );
                     })}
                 </div>
             </div>
-
-            <PhotoLightbox
-                open={lightboxOpen}
-                onClose={() => setLightboxOpen(false)}
-                images={slides}
-                index={currentIndex}
-                onIndexChange={setCurrentIndex}
-            />
         </div>
     );
 }

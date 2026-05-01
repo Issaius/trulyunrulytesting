@@ -1,4 +1,5 @@
 import type { SanityImageSource } from '@sanity/image-url';
+import type { PortableTextBlock } from '@portabletext/types';
 import { groq } from 'next-sanity';
 
 import { urlFor } from './image';
@@ -8,9 +9,10 @@ import { client } from './sanity';
 export type HomeSliderSlide = {
   src: string;
   alt: string;
-  /** Optional CMS headline; falls back to filename-style text from `src` in the UI. */
-  title?: string;
-  text?: string;
+  /** Optional rich CMS headline; falls back to filename-style text from `src` in the UI. */
+  title?: PortableTextBlock[];
+  /** Optional rich caption with inline links. */
+  caption?: PortableTextBlock[];
   /** Original pixel size from Sanity asset metadata; used to size the slider without cropping. */
   width?: number;
   height?: number;
@@ -32,7 +34,8 @@ const HOME_SLIDER_QUERY = groq`
         }
       },
       title,
-      caption
+      caption,
+      alt
     }
   }
 `;
@@ -49,8 +52,9 @@ export async function getHomeSliderSlides(): Promise<HomeSliderSlide[]> {
           metadata?: { dimensions?: { width?: number; height?: number } | null } | null;
         } | null;
       };
-      title?: string | null;
-      caption?: string | null;
+      title?: PortableTextBlock[] | null;
+      caption?: PortableTextBlock[] | null;
+      alt?: string | null;
     }> | null;
   }>(HOME_SLIDER_QUERY);
 
@@ -64,17 +68,18 @@ export async function getHomeSliderSlides(): Promise<HomeSliderSlide[]> {
     if (!slide?.image) continue;
 
     const src = urlFor(slide.image).width(2400).quality(90).url();
-    const caption = slide.caption?.trim() ?? '';
-    const title = slide.title?.trim() || undefined;
+    const title = slide.title?.length ? slide.title : undefined;
+    const caption = slide.caption?.length ? slide.caption : undefined;
+    const alt = slide.alt?.trim() || 'Photo';
     const dims = slide.image?.asset?.metadata?.dimensions;
     const w = dims?.width;
     const h = dims?.height;
 
     out.push({
       src,
-      alt: caption || title || 'Photo',
+      alt,
       title,
-      text: '',
+      ...(caption ? { caption } : {}),
       ...(typeof w === 'number' && typeof h === 'number' && w > 0 && h > 0
         ? { width: w, height: h }
         : {}),
@@ -87,10 +92,10 @@ export async function getHomeSliderSlides(): Promise<HomeSliderSlide[]> {
 export type PortfolioGalleryImage = {
   src: string;
   alt: string;
-  /** Optional CMS title (same as Home Slider). */
-  title?: string;
-  /** CMS caption for alt text (may be empty). */
-  caption?: string;
+  /** Optional rich CMS title (same as Home Slider). */
+  title?: PortableTextBlock[];
+  /** Rich caption content for display (may be empty). */
+  caption?: PortableTextBlock[];
   width?: number;
   height?: number;
 };
@@ -112,7 +117,8 @@ const PORTFOLIO_QUERY = groq`
         }
       },
       title,
-      caption
+      caption,
+      alt
     }
   }
 `;
@@ -133,8 +139,9 @@ export async function getPortfolioPage(): Promise<{
           metadata?: { dimensions?: { width?: number; height?: number } | null } | null;
         } | null;
       };
-      title?: string | null;
-      caption?: string | null;
+      title?: PortableTextBlock[] | null;
+      caption?: PortableTextBlock[] | null;
+      alt?: string | null;
     }> | null;
   } | null>(PORTFOLIO_QUERY);
 
@@ -147,15 +154,16 @@ export async function getPortfolioPage(): Promise<{
   for (const row of data.images) {
     if (!row?.image) continue;
     const src = urlFor(row.image).width(2000).quality(90).url();
-    const caption = row.caption?.trim() ?? '';
-    const title = row.title?.trim() || undefined;
+    const title = row.title?.length ? row.title : undefined;
+    const caption = row.caption?.length ? row.caption : undefined;
+    const alt = row.alt?.trim() || 'Portfolio image';
     const dims = row.image?.asset?.metadata?.dimensions;
     const w = dims?.width;
     const h = dims?.height;
 
     images.push({
       src,
-      alt: caption || title || 'Portfolio image',
+      alt,
       title,
       ...(caption ? { caption } : {}),
       ...(typeof w === 'number' && typeof h === 'number' && w > 0 && h > 0

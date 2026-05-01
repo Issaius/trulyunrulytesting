@@ -32,18 +32,79 @@ export const portfolio = defineType({
             defineField({
               name: 'title',
               title: 'Title',
-              type: 'string',
-              description: 'Optional image title (same as Home Slider).',
+              type: 'array',
+              of: [
+                {
+                  type: 'block',
+                  marks: {
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Link',
+                        fields: [
+                          defineField({
+                            name: 'href',
+                            type: 'url',
+                            title: 'URL',
+                            validation: (Rule) =>
+                              Rule.uri({
+                                scheme: ['http', 'https', 'mailto', 'tel'],
+                              }),
+                          }),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+              description: 'Optional image title with inline links for selected words.',
             }),
             defineField({
               name: 'caption',
               title: 'Caption',
+              type: 'array',
+              of: [
+                {
+                  type: 'block',
+                  marks: {
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Link',
+                        fields: [
+                          defineField({
+                            name: 'href',
+                            type: 'url',
+                            title: 'URL',
+                            validation: (Rule) =>
+                              Rule.uri({
+                                scheme: ['http', 'https', 'mailto', 'tel'],
+                              }),
+                          }),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+              description: 'Caption text with optional inline links.',
+            }),
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
               type: 'string',
-              description: 'Caption and image alt text (same as Home Slider).',
+              validation: (Rule) => Rule.required(),
+              description: 'Required plain-text description for accessibility and screen readers.',
             }),
           ],
           preview: {
-            select: { title: 'title', subtitle: 'caption', media: 'image' },
+            select: {
+              title: 'title.0.children.0.text',
+              subtitle: 'alt',
+              media: 'image',
+            },
             prepare({ title, subtitle, media }) {
               return { title: title || subtitle || 'Image', subtitle, media };
             },

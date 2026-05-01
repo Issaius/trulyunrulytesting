@@ -25,20 +25,77 @@ export const homeSlider = defineType({
             defineField({
               name: 'title',
               title: 'Title',
-              type: 'string',
-              description: 'Shown as the slide headline (replaces filename).',
+              type: 'array',
+              of: [
+                {
+                  type: 'block',
+                  marks: {
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Link',
+                        fields: [
+                          defineField({
+                            name: 'href',
+                            type: 'url',
+                            title: 'URL',
+                            validation: (Rule) =>
+                              Rule.uri({
+                                scheme: ['http', 'https', 'mailto', 'tel'],
+                              }),
+                          }),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+              description: 'Shown as the slide headline. You can add links to selected words.',
             }),
             defineField({
               name: 'caption',
               title: 'Caption',
+              type: 'array',
+              of: [
+                {
+                  type: 'block',
+                  marks: {
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Link',
+                        fields: [
+                          defineField({
+                            name: 'href',
+                            type: 'url',
+                            title: 'URL',
+                            validation: (Rule) =>
+                              Rule.uri({
+                                scheme: ['http', 'https', 'mailto', 'tel'],
+                              }),
+                          }),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+              description: 'Caption text. You can add links to selected words.',
+            }),
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
               type: 'string',
-              description: 'Subtitle and image alt text for accessibility.',
+              validation: (Rule) => Rule.required(),
+              description: 'Required plain-text description for accessibility and screen readers.',
             }),
           ],
           preview: {
-            select: { title: 'title', media: 'image' },
-            prepare({ title, media }) {
-              return { title: title || 'Slide', media };
+            select: { title: 'title.0.children.0.text', subtitle: 'alt', media: 'image' },
+            prepare({ title, subtitle, media }) {
+              return { title: title || subtitle || 'Slide', subtitle, media };
             },
           },
         },

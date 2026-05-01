@@ -318,23 +318,26 @@ function HeroSection({
   wordTrackRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-6">
-      <h1 ref={h1Ref} style={{ padding: 0 }}>
+    <section className="min-h-screen flex flex-col items-center justify-center text-center px-6">
+      <h1 ref={h1Ref}>
         Photodesigner
         <br />
         based in munich
       </h1>
 
-      <p className="mt-[8px] text-xl font-body font-normal not-italic lowercase tracking-wide text-zinc-500">
+      <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
         (available worldwide)
       </p>
 
-      <div className="mt-8 text-[calc(1.5rem+4px)] font-body italic text-zinc-400 flex items-center justify-center gap-2 max-w-full">
+      <div className="mt-8 flex items-center justify-center gap-2 font-body italic text-zinc-400 text-[calc(1.5rem+4px)] max-w-full">
         <span>for:</span>
-        <div className="h-[1.5em] overflow-hidden text-left relative">
+        <div className="h-[1.5em] min-w-0 overflow-hidden">
           <div ref={wordTrackRef} className="flex flex-col">
             {SLIDER_WORDS_FOR_DISPLAY.map((word, i) => (
-              <span key={i} className="h-[1.5em] flex items-center whitespace-nowrap">
+              <span
+                key={i}
+                className="h-[1.5em] flex items-center justify-center whitespace-nowrap"
+              >
                 {word}
               </span>
             ))}
@@ -348,8 +351,8 @@ function HeroSection({
 function HomeSliderSection({ slides }: { slides: HomeSliderSlide[] }) {
   if (slides.length === 0) {
     return (
-      <section className="w-full pb-10 px-6 text-zinc-400">
-        <p className="w-[66vw] mx-auto">
+      <section className="w-full px-6 pb-16 text-zinc-400">
+        <p className="mx-auto w-full max-w-[min(66vw,1200px)]">
           No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.
         </p>
       </section>
@@ -357,8 +360,8 @@ function HomeSliderSection({ slides }: { slides: HomeSliderSlide[] }) {
   }
 
   return (
-    <section className="w-full pb-10 px-6">
-      <div className="w-[66vw] mx-auto">
+    <section className="w-full px-6 pb-16 overflow-hidden">
+      <div className="mx-auto w-full max-w-[min(66vw,1400px)]">
         <CoverflowSlider slides={slides} />
       </div>
     </section>
@@ -382,7 +385,7 @@ function ProcessSection({
   } as CSSProperties;
 
   return (
-    <section className="px-6 w-[75vw] mx-auto mb-16">
+    <section className="px-6 w-full max-w-[min(75vw,1400px)] mx-auto mb-16">
       <h2 className="headline">the process</h2>
 
       <div className="w-[calc(100%+3rem)] -ml-6 md:w-full md:ml-0">
@@ -473,7 +476,7 @@ function UnderlineHeading({ children }: { children: ReactNode }) {
 
 function PricingSection() {
   return (
-    <section className="pt-0 pb-16 px-6 w-[75vw] mx-auto">
+    <section className="pt-0 pb-16 px-6 w-full max-w-[min(75vw,1400px)] mx-auto">
       <h2 className="headline">pricing</h2>
 
       <div className="mb-16">

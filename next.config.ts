@@ -1,6 +1,15 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
 import type { NextConfig } from "next";
 
+/** Turbopack project root — must be this app folder so deps resolve from `trulyunrulytesting/node_modules`, not the parent `Documents` lockfile workspace. */
+const turbopackRoot = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: turbopackRoot,
+  },
   images: {
     remotePatterns: [
       {

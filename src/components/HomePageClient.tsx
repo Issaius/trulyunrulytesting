@@ -360,7 +360,7 @@ function HomeSliderSection({ slides }: { slides: HomeSliderSlide[] }) {
   }
 
   return (
-    <section className="w-full px-6 pb-16 overflow-hidden">
+    <section className="w-full px-6 pb-16">
       <div className="mx-auto w-full max-w-[min(66vw,1400px)]">
         <CoverflowSlider slides={slides} />
       </div>

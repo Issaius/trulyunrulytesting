@@ -153,7 +153,7 @@ export async function getPortfolioPage(): Promise<{
 
   for (const row of data.images) {
     if (!row?.image) continue;
-    const src = urlFor(row.image).width(2000).quality(90).url();
+    const src = urlFor(row.image).width(2800).quality(90).url();
     const title = row.title?.length ? row.title : undefined;
     const caption = row.caption?.length ? row.caption : undefined;
     const alt = row.alt?.trim() || 'Portfolio image';

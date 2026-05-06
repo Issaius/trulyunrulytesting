@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-import { GALLERY_SHADOW } from '@/lib/gallery-shadow';
+import { GALLERY_SHADOW, galleryShadowBoxCss } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText, type SanityRichText } from '@/lib/sanity-richtext';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
@@ -24,10 +24,52 @@ interface CoverflowSliderProps {
     slides: Slide[];
 }
 
+type BoxSize = {
+    width: number;
+    height: number;
+};
+
+/**
+ * When max-height caps the frame but width is still `w-full`, the measured box can be
+ * wider than a 3:2 rectangle at that height. This returns the true 3:2 slot so the
+ * header and image math line up with the visible picture edges.
+ */
+function effectiveThreeByTwoSlot(raw: BoxSize | null): BoxSize | null {
+    if (!raw || raw.width <= 0 || raw.height <= 0) {
+        return null;
+    }
+    const width = Math.min(raw.width, (raw.height * 3) / 2);
+    const height = (width * 2) / 3;
+    return { width, height };
+}
+
+function getContainedImageBox(frame: BoxSize | null, slide: Slide): BoxSize | null {
+    if (!frame || frame.width <= 0 || frame.height <= 0) {
+        return null;
+    }
+
+    const imageWidth = slide.width ?? 2400;
+    const imageHeight = slide.height ?? 1600;
+    const imageAspect = imageWidth / imageHeight;
+    const frameAspect = frame.width / frame.height;
+
+    if (frameAspect > imageAspect) {
+        return {
+            width: frame.height * imageAspect,
+            height: frame.height,
+        };
+    }
+
+    return {
+        width: frame.width,
+        height: frame.width / imageAspect,
+    };
+}
+
 export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [imageBandWidth, setImageBandWidth] = useState<number | null>(null);
-    const imageBlockRef = useRef<HTMLButtonElement | null>(null);
+    const [imageFrameSize, setImageFrameSize] = useState<BoxSize | null>(null);
+    const imageFrameRef = useRef<HTMLDivElement | null>(null);
     const { open: openLightbox } = useLightbox();
     const captionFontSizePx = Math.round(28 * 0.8);
     const titleFontSizePx = Math.round(captionFontSizePx * 1.5);
@@ -40,33 +82,52 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     };
 
-    const current = slides[currentIndex];
-    const titlePlain = richTextToPlainText(current.title);
-    const captionPlain = richTextToPlainText(current.caption);
-
     /** Keep the frame contained on large desktop screens. */
     const imageMaxHeight = 'min(72dvh, 760px)';
 
     useLayoutEffect(() => {
-        if (slides.length === 0) {
-            return;
-        }
-        const el = imageBlockRef.current;
+        const el = imageFrameRef.current;
         if (!el) {
             return;
         }
         const update = () => {
-            setImageBandWidth(el.getBoundingClientRect().width);
+            const { width, height } = el.getBoundingClientRect();
+            setImageFrameSize((previous) => {
+                if (
+                    previous &&
+                    Math.abs(previous.width - width) < 0.5 &&
+                    Math.abs(previous.height - height) < 0.5
+                ) {
+                    return previous;
+                }
+
+                return { width, height };
+            });
         };
         update();
         const ro = new ResizeObserver(update);
         ro.observe(el);
         return () => ro.disconnect();
-    }, [slides.length, currentIndex, current?.src, current?.width, current?.height]);
+    }, [slides.length]);
 
     if (slides.length === 0) {
         return null;
     }
+
+    const current = slides[currentIndex] ?? slides[0];
+    const layoutFrame = effectiveThreeByTwoSlot(imageFrameSize);
+    const slotFrame =
+        layoutFrame == null
+            ? null
+            : (() => {
+                  const width = Math.round(layoutFrame.width);
+                  const height = Math.round((width * 2) / 3);
+                  return { width, height };
+              })();
+    /** Aligns with the 3:2 slot (not an over-wide `w-full` rect when max-height binds). */
+    const headerBandWidthPx = slotFrame?.width ?? null;
+    const titlePlain = richTextToPlainText(current.title);
+    const captionPlain = richTextToPlainText(current.caption);
 
     return (
         <div className="relative w-full flex flex-col items-center min-w-0">
@@ -74,8 +135,8 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                 <div
                     className="flex flex-row justify-between items-center gap-3 md:gap-4 mb-3 md:mb-4 mx-auto w-full max-w-full min-w-0"
                     style={
-                        imageBandWidth != null
-                            ? { width: imageBandWidth, maxWidth: '100%' }
+                        headerBandWidthPx != null
+                            ? { width: headerBandWidthPx, maxWidth: '100%' }
                             : undefined
                     }
                 >
@@ -121,12 +182,19 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                 </div>
 
                 <div
-                    className="relative mx-auto flex w-full max-w-full min-h-0 aspect-[3/2] items-center justify-center overflow-hidden bg-black"
-                    style={{ maxHeight: imageMaxHeight }}
+                    ref={imageFrameRef}
+                    className="relative mx-auto flex w-full max-w-full min-h-0 aspect-[3/2] items-center justify-center overflow-visible bg-black"
+                    style={{
+                        maxHeight: imageMaxHeight,
+                        ...(headerBandWidthPx != null
+                            ? { width: `${headerBandWidthPx}px`, maxWidth: '100%' }
+                            : {}),
+                    }}
                 >
                     {slides.map((slide, index) => {
                         const w = slide.width ?? 2400;
                         const h = slide.height ?? 1600;
+                        const imageBox = getContainedImageBox(slotFrame, slide);
                         return (
                             <div
                                 key={index}
@@ -138,8 +206,18 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                             >
                                 <button
                                     type="button"
-                                    ref={index === currentIndex ? imageBlockRef : undefined}
-                                    className={`relative w-fit max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer ${GALLERY_SHADOW}`}
+                                    className={`relative ${imageBox ? 'block' : 'w-fit'} max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer ${imageBox ? '' : GALLERY_SHADOW}`}
+                                    style={
+                                        imageBox
+                                            ? {
+                                                width: `${imageBox.width}px`,
+                                                height: `${imageBox.height}px`,
+                                                boxShadow: galleryShadowBoxCss(
+                                                    Math.min(imageBox.width, imageBox.height),
+                                                ),
+                                            }
+                                            : undefined
+                                    }
                                     onClick={() => openLightbox(slides, currentIndex)}
                                     aria-label="Open image in full viewer"
                                 >
@@ -148,7 +226,11 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                                         alt={slide.alt}
                                         width={w}
                                         height={h}
-                                        className="block h-auto w-auto max-h-full max-w-full object-contain"
+                                        className={
+                                            imageBox
+                                                ? 'block h-full w-full object-contain'
+                                                : 'block h-auto w-auto max-h-full max-w-full object-contain'
+                                        }
                                         priority={index === currentIndex}
                                         sizes="75vw"
                                     />

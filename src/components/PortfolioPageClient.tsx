@@ -155,7 +155,7 @@ const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
             alt={item.alt}
             width={item.width ?? 1200}
             height={item.height ?? 1600}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 3840px) 25vw, 960px"
             className="w-full h-auto object-cover align-bottom"
             loading={index < 6 ? 'eager' : 'lazy'}
           />
@@ -279,7 +279,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
       <section
         ref={gallerySectionRef}
-        className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 pb-24 sm:pb-32"
+        className="w-full max-w-[min(100%,3840px)] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 pb-24 sm:pb-32"
         aria-label="Portfolio gallery"
       >
         {intro ? (
@@ -293,7 +293,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
             Gallery images will appear here once added in Studio.
           </p>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5 [column-fill:_balance]">
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5 lg:gap-6 xl:gap-7 2xl:gap-8 [column-fill:_balance]">
             {images.map((item, i) => (
               <PortfolioGalleryCell
                 key={`${item.src}-${i}`}

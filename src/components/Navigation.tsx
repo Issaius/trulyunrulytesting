@@ -7,7 +7,7 @@ const NAV_GRAPHIC = "/nav-placeholder.svg";
 const links = [
   { href: "/", label: "HOME" },
   { href: "/portfolio", label: "PORTFOLIO" },
-  { href: "/about", label: "ABOUT" },
+  { href: "/about", label: "ABOUT & CONTACT" },
   { href: "/impressum", label: "LEGAL" },
 ] as const;
 

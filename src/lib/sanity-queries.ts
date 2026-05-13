@@ -89,6 +89,70 @@ export async function getHomeSliderSlides(): Promise<HomeSliderSlide[]> {
   return out;
 }
 
+export type AboutPageData = {
+  slides: Array<{
+    src: string;
+    alt: string;
+    width?: number;
+    height?: number;
+  }>;
+};
+
+const ABOUT_PAGE_QUERY = groq`
+  *[_type == "aboutPage"] | order(_updatedAt desc)[0]{
+    sliderImages[]{
+      image{
+        ...,
+        asset->{
+          ...,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      },
+      alt
+    }
+  }
+`;
+
+export async function getAboutPage(): Promise<AboutPageData> {
+  if (!client) {
+    return { slides: [] };
+  }
+
+  const data = await client.fetch<{
+    sliderImages?: Array<{
+      image?: SanityImageSource & {
+        asset?: {
+          metadata?: { dimensions?: { width?: number; height?: number } | null } | null;
+        } | null;
+      };
+      alt?: string | null;
+    }> | null;
+  } | null>(ABOUT_PAGE_QUERY);
+
+  const slides: AboutPageData['slides'] = [];
+
+  for (const row of data?.sliderImages ?? []) {
+    if (!row?.image) continue;
+    const dims = row.image.asset?.metadata?.dimensions;
+    const w = dims?.width;
+    const h = dims?.height;
+    slides.push({
+      src: urlFor(row.image).width(2000).quality(90).url(),
+      alt: row.alt?.trim() || 'About photo',
+      ...(typeof w === 'number' && typeof h === 'number' && w > 0 && h > 0 ? { width: w, height: h } : {}),
+    });
+  }
+
+  return {
+    slides,
+  };
+}
+
 export type PortfolioGalleryImage = {
   src: string;
   alt: string;

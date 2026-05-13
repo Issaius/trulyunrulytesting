@@ -1,34 +1,66 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+import { galleryShadowBoxCss } from '@/lib/gallery-shadow';
 
 export type AboutSlide = {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
 };
 
 type AboutImageSliderProps = {
   slides: AboutSlide[];
-  /** Auto-advance interval in ms; set to 0 to disable. */
+  /** Auto-advance interval in ms (default 2000); set to 0 to disable. */
   autoAdvanceMs?: number;
 };
 
+type BoxSize = {
+  width: number;
+  height: number;
+};
+
+/** Contain `imageWidth`×`imageHeight` inside `frame` (same math as homepage `CoverflowSlider`). */
+function getContainedImageBox(
+  frame: BoxSize | null,
+  imageWidth: number,
+  imageHeight: number,
+): BoxSize | null {
+  if (!frame || frame.width <= 0 || frame.height <= 0) {
+    return null;
+  }
+
+  const imageAspect = imageWidth / imageHeight;
+  const frameAspect = frame.width / frame.height;
+
+  if (frameAspect > imageAspect) {
+    return {
+      width: frame.height * imageAspect,
+      height: frame.height,
+    };
+  }
+
+  return {
+    width: frame.width,
+    height: frame.width / imageAspect,
+  };
+}
+
 export default function AboutImageSlider({
   slides,
-  autoAdvanceMs = 5500,
+  autoAdvanceMs = 2000,
 }: AboutImageSliderProps) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [frameSize, setFrameSize] = useState<BoxSize | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
 
   const next = useCallback(() => {
     if (slides.length < 2) return;
     setIndex((i) => (i + 1) % slides.length);
-  }, [slides.length]);
-
-  const prev = useCallback(() => {
-    if (slides.length < 2) return;
-    setIndex((i) => (i - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
   useEffect(() => {
@@ -37,13 +69,37 @@ export default function AboutImageSlider({
     return () => window.clearInterval(id);
   }, [slides.length, autoAdvanceMs, next, paused]);
 
+  useLayoutEffect(() => {
+    const el = frameRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => {
+      const { width, height } = el.getBoundingClientRect();
+      setFrameSize((previous) => {
+        if (
+          previous &&
+          Math.abs(previous.width - width) < 0.5 &&
+          Math.abs(previous.height - height) < 0.5
+        ) {
+          return previous;
+        }
+        return { width, height };
+      });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [slides.length]);
+
   const shellClass =
-    'relative w-full max-w-[min(100%,23rem)] mx-auto md:mx-0 md:ml-auto';
+    'relative w-full max-w-[min(100%,min(calc(90vw_*_1.3),calc(42rem_*_1.3)))] mx-auto md:mx-0 md:ml-auto';
 
   if (slides.length === 0) {
     return (
       <div className={shellClass}>
-        <div className="aspect-[4/5] w-full rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
+        <div className="aspect-[3/2] w-full bg-zinc-900/35 flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
           Add images to the slider.
         </div>
       </div>
@@ -56,85 +112,60 @@ export default function AboutImageSlider({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-zinc-900">
-        {slides.map((slide, i) => (
-          <div
-            key={`${slide.src}-${i}`}
-            className="absolute inset-0 transition-opacity duration-500 ease-out"
-            style={{
-              opacity: i === index ? 1 : 0,
-              pointerEvents: i === index ? 'auto' : 'none',
-            }}
-          >
-            <Image
-              src={slide.src}
-              alt={slide.alt}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) min(100vw, 23rem), 23rem"
-              priority={i === 0}
-            />
-          </div>
-        ))}
+      <div
+        ref={frameRef}
+        className="relative aspect-[3/2] w-full overflow-visible bg-zinc-900/35"
+      >
+        {slides.map((slide, i) => {
+          const iw = slide.width ?? 2400;
+          const ih = slide.height ?? 1600;
+          const imageBox = getContainedImageBox(frameSize, iw, ih);
 
-        {slides.length > 1 ? (
-          <>
-            <button
-              type="button"
-              onClick={prev}
-              className="absolute left-2 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              aria-label="Previous image"
+          return (
+            <div
+              key={`${slide.src}-${i}`}
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out"
+              style={{
+                opacity: i === index ? 1 : 0,
+                pointerEvents: i === index ? 'auto' : 'none',
+              }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-5 w-5"
-                aria-hidden
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={next}
-              className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              aria-label="Next image"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-5 w-5"
-                aria-hidden
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          </>
-        ) : null}
+              {imageBox ? (
+                <div
+                  className="relative shrink-0"
+                  style={{
+                    width: `${imageBox.width}px`,
+                    height: `${imageBox.height}px`,
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    boxShadow: galleryShadowBoxCss(Math.min(imageBox.width, imageBox.height)),
+                  }}
+                >
+                  <Image
+                    src={slide.src}
+                    alt={slide.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) min(100vw, calc(90vw * 1.3)), min(calc(42rem * 1.3), calc(90vw * 1.3))"
+                    priority={i === 0}
+                  />
+                </div>
+              ) : (
+                <div className="relative h-full w-full">
+                  <Image
+                    src={slide.src}
+                    alt={slide.alt}
+                    fill
+                    className="object-contain object-center"
+                    sizes="(max-width: 768px) min(100vw, calc(90vw * 1.3)), min(calc(42rem * 1.3), calc(90vw * 1.3))"
+                    priority={i === 0}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-
-      {slides.length > 1 ? (
-        <div className="mt-4 flex items-center justify-center gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`Image ${i + 1} of ${slides.length}`}
-              aria-current={i === index}
-              onClick={() => setIndex(i)}
-              className={`h-2 rounded-full transition-all ${
-                i === index ? 'w-6 bg-white' : 'w-2 bg-zinc-600 hover:bg-zinc-500'
-              }`}
-            />
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

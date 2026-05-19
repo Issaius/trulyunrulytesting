@@ -310,6 +310,46 @@ function useProcessStripScrub() {
 // Sections (presentational)
 // =============================================================================
 
+function HeroNavButton({
+  href,
+  label,
+  imageSrc,
+  ariaLabel,
+  minWidthClass = 'min-w-[9.5rem]',
+  imageClassName = '',
+}: {
+  href: string;
+  label: string;
+  imageSrc: string;
+  ariaLabel: string;
+  minWidthClass?: string;
+  imageClassName?: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={`group relative inline-flex h-[120px] ${minWidthClass} shrink-0 items-center justify-center rounded-full border-0 bg-transparent px-4`}
+      aria-label={ariaLabel}
+    >
+      <span
+        className="pointer-events-none absolute inset-0 flex items-center justify-center font-body text-[calc(1.5rem+4px)] tracking-wide text-white opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+        aria-hidden
+      >
+        {label}
+      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element -- mix-blend-screen; black keyed on page bg */}
+      <img
+        src={imageSrc}
+        alt=""
+        width={120}
+        height={120}
+        draggable={false}
+        className={`pointer-events-none absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 select-none object-contain mix-blend-screen opacity-100 transition-opacity duration-300 ease-out group-hover:opacity-40 group-focus-visible:opacity-40 ${imageClassName}`}
+      />
+    </a>
+  );
+}
+
 function HeroSection({
   h1Ref,
   wordTrackRef,
@@ -343,6 +383,23 @@ function HeroSection({
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-8 pt-5">
+        <HeroNavButton
+          href="/about"
+          label="Contact"
+          imageSrc="/phone-button.png"
+          ariaLabel="About and contact"
+          imageClassName="rounded-full"
+        />
+        <HeroNavButton
+          href="/portfolio"
+          label="Portfolio"
+          imageSrc="/portfolio-button.png"
+          ariaLabel="Portfolio"
+          minWidthClass="min-w-[11rem]"
+        />
       </div>
     </section>
   );
@@ -476,7 +533,7 @@ function UnderlineHeading({ children }: { children: ReactNode }) {
 
 function PricingSection() {
   return (
-    <section className="pt-0 pb-16 px-6 w-full max-w-[min(75vw,1400px)] mx-auto">
+    <section className="page-last-section pt-0 px-6 w-full max-w-[min(75vw,1400px)] mx-auto">
       <h2 className="headline">pricing</h2>
 
       <div className="mb-16">

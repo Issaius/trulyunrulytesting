@@ -35,6 +35,25 @@ export default function SiteLayout({
             priority
           />
         </div>
+        <div
+          className="pointer-events-none absolute inset-x-2 bottom-2 z-10 flex items-end justify-between"
+          aria-hidden
+        >
+          <Image
+            src={CORNER_IMAGE}
+            alt=""
+            width={400}
+            height={400}
+            className="h-auto w-[min(42vw,320px)] -scale-y-100 select-none"
+          />
+          <Image
+            src={CORNER_IMAGE}
+            alt=""
+            width={400}
+            height={400}
+            className="h-auto w-[min(42vw,320px)] -scale-x-100 -scale-y-100 select-none"
+          />
+        </div>
         <CursorFollower />
         <Navigation />
         {children}

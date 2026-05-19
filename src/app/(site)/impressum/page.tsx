@@ -13,7 +13,7 @@ export default function Impressum() {
         </div>
       </section>
 
-      <section>
+      <section className="page-last-section">
         <h2 className="text-xl font-semibold mb-4 text-white">Allgemeine Geschäftsbedingungen (AGB)</h2>
         <div className="text-zinc-400 space-y-4">
           <p>1. Geltungsbereich</p>

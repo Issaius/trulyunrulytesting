@@ -279,7 +279,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
       <section
         ref={gallerySectionRef}
-        className="w-full max-w-[min(100%,3840px)] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 pb-24 sm:pb-32"
+        className="page-last-section w-full max-w-[min(100%,3840px)] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12"
         aria-label="Portfolio gallery"
       >
         {intro ? (

@@ -53,6 +53,11 @@
   --section-headline-padding-before: 100px;
   /* Space below section headlines — use margin so it collapses cleanly with child margins */
   --section-headline-gap-after: 100px;
+
+  /* Room for fixed corner accents (matches layout wing size + inset-2) */
+  --corner-accent-size: min(42vw, 320px);
+  --corner-accent-inset: 0.5rem;
+  --corner-accent-clearance: calc(var(--corner-accent-size) + var(--corner-accent-inset));
 }
 
 /* ─── Base Styles ────────────────────────────────────────────────── */
@@ -102,6 +107,11 @@ h1,
 .headline {
   padding-top: var(--section-headline-padding-before);
   margin-bottom: var(--section-headline-gap-after);
+}
+
+/* Bottom-most section on each page — clearance for corner wings */
+.page-last-section {
+  padding-bottom: var(--corner-accent-clearance);
 }
 
 /* Smaller headings — Times New Roman */

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { galleryShadowBoxCss } from '@/lib/gallery-shadow';
 
@@ -51,23 +51,26 @@ function getContainedImageBox(
 
 export default function AboutImageSlider({
   slides,
-  autoAdvanceMs = 2000,
+  autoAdvanceMs = 3000,
 }: AboutImageSliderProps) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [frameSize, setFrameSize] = useState<BoxSize | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const slideCountRef = useRef(slides.length);
 
-  const next = useCallback(() => {
-    if (slides.length < 2) return;
-    setIndex((i) => (i + 1) % slides.length);
-  }, [slides.length]);
+  slideCountRef.current = slides.length;
 
   useEffect(() => {
-    if (slides.length < 2 || !autoAdvanceMs || paused) return;
-    const id = window.setInterval(next, autoAdvanceMs);
+    if (slides.length < 2 || !autoAdvanceMs) return;
+
+    const id = window.setInterval(() => {
+      const count = slideCountRef.current;
+      if (count < 2) return;
+      setIndex((i) => (i + 1) % count);
+    }, autoAdvanceMs);
+
     return () => window.clearInterval(id);
-  }, [slides.length, autoAdvanceMs, next, paused]);
+  }, [slides.length, autoAdvanceMs]);
 
   useLayoutEffect(() => {
     const el = frameRef.current;
@@ -99,7 +102,7 @@ export default function AboutImageSlider({
   if (slides.length === 0) {
     return (
       <div className={shellClass}>
-        <div className="aspect-[3/2] w-full bg-zinc-900/35 flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
+        <div className="aspect-[3/2] w-full bg-black flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
           Add images to the slider.
         </div>
       </div>
@@ -107,14 +110,10 @@ export default function AboutImageSlider({
   }
 
   return (
-    <div
-      className={shellClass}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <div className={shellClass}>
       <div
         ref={frameRef}
-        className="relative aspect-[3/2] w-full overflow-visible bg-zinc-900/35"
+        className="relative aspect-[3/2] w-full overflow-visible bg-black"
       >
         {slides.map((slide, i) => {
           const iw = slide.width ?? 2400;

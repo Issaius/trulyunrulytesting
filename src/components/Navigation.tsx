@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 /** Replace with your logo PNG at public/nav-logo.png (optional). SVG placeholder: /nav-placeholder.svg */
-const NAV_GRAPHIC = "/nav-placeholder.svg";
+const NAV_GRAPHIC = "/nav-logo.svg";
 
 const links = [
   { href: "/", label: "HOME" },
@@ -14,17 +14,17 @@ const links = [
 export default function Navigation() {
   return (
     <nav
-      className="fixed top-0 left-0 z-50 flex w-full justify-center p-6"
+      className="fixed inset-x-0 top-0 z-50 flex justify-center p-6"
       aria-label="Site"
     >
-      <div className="group relative inline-flex flex-col items-center">
-        <div className="relative h-14 w-[200px] select-none">
+      <div className="group relative flex w-fit flex-col items-center">
+        <div className="relative flex h-14 select-none items-center justify-center">
           <Image
             src={NAV_GRAPHIC}
             alt=""
-            width={200}
-            height={56}
-            className="h-14 w-auto object-contain"
+            width={821}
+            height={728}
+            className="h-14 w-auto max-w-[min(90vw,320px)] object-contain object-center"
             priority
           />
         </div>

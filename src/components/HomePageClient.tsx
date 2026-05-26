@@ -408,8 +408,8 @@ function HeroSection({
 function HomeSliderSection({ slides }: { slides: HomeSliderSlide[] }) {
   if (slides.length === 0) {
     return (
-      <section className="w-full px-6 pb-16 text-zinc-400">
-        <p className="mx-auto w-full max-w-[min(66vw,1200px)]">
+      <section className="content-section section-gap-after text-zinc-400">
+        <p>
           No slides yet. Add a &quot;Home Slider&quot; document in Sanity Studio and publish.
         </p>
       </section>
@@ -417,10 +417,8 @@ function HomeSliderSection({ slides }: { slides: HomeSliderSlide[] }) {
   }
 
   return (
-    <section className="w-full px-6 pb-16">
-      <div className="mx-auto w-full max-w-[min(66vw,1400px)]">
-        <CoverflowSlider slides={slides} />
-      </div>
+    <section className="content-section section-gap-after">
+      <CoverflowSlider slides={slides} />
     </section>
   );
 }
@@ -442,7 +440,7 @@ function ProcessSection({
   } as CSSProperties;
 
   return (
-    <section className="px-6 w-full max-w-[min(75vw,1400px)] mx-auto mb-16">
+    <section className="content-section section-gap-after">
       <h2 className="headline">the process</h2>
 
       <div className="w-[calc(100%+3rem)] -ml-6 md:w-full md:ml-0">
@@ -533,7 +531,7 @@ function UnderlineHeading({ children }: { children: ReactNode }) {
 
 function PricingSection() {
   return (
-    <section className="page-last-section pt-0 px-6 w-full max-w-[min(75vw,1400px)] mx-auto">
+    <section className="content-section page-last-section pt-0">
       <h2 className="headline">pricing</h2>
 
       <div className="mb-16">

@@ -63,7 +63,7 @@
   --mobile-inline-padding: 5%;
   --mobile-hero-inline-padding: 10%;
   --mobile-hero-padding-top: calc(var(--corner-accent-clearance) + 5.5rem);
-  --text-display-hero-mobile: calc(var(--text-display) - 12px);
+  --text-display-hero-mobile: calc(var(--text-display) - 16px);
 }
 
 /* ─── Base Styles ────────────────────────────────────────────────── */

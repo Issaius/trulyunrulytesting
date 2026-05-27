@@ -258,7 +258,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
   return (
     <main ref={container} className="text-center">
-      <section className="min-h-screen flex flex-col items-center justify-center px-6">
+      <section className="hero-section min-h-screen flex flex-col items-center justify-center md:px-6">
         <h1 ref={h1Ref} className="normal-case p-0">
           The Work
         </h1>
@@ -279,7 +279,7 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
       <section
         ref={gallerySectionRef}
-        className="page-last-section w-full max-w-[min(100%,3840px)] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12"
+        className="page-last-section w-full max-w-[min(100%,3840px)] mx-auto max-md:px-[10%] md:px-6 lg:px-8 xl:px-10 2xl:px-12"
         aria-label="Portfolio gallery"
       >
         {intro ? (

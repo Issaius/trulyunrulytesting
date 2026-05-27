@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type ReactNode,
   type RefObject,
 } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import CoverflowSlider from './CoverflowSlider';
+import UnderlineHeading from './UnderlineHeading';
 import type { HomeSliderSlide } from '@/lib/sanity-queries';
 
 // =============================================================================
@@ -358,48 +358,50 @@ function HeroSection({
   wordTrackRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-      <h1 ref={h1Ref}>
-        Photodesigner
-        <br />
-        based in munich
-      </h1>
+    <section className="hero-section hero-section--from-top min-h-screen flex flex-col items-center justify-center max-md:justify-start text-center md:px-6">
+      <div className="hero-section-inner flex flex-col items-center">
+        <h1 ref={h1Ref}>
+          Photodesigner
+          <br />
+          based in munich
+        </h1>
 
-      <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
-        (available worldwide)
-      </p>
+        <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
+          (available worldwide)
+        </p>
 
-      <div className="mt-8 flex items-center justify-center gap-2 font-body italic text-zinc-400 text-[calc(1.5rem+4px)] max-w-full">
-        <span>for:</span>
-        <div className="h-[1.5em] min-w-0 overflow-hidden">
-          <div ref={wordTrackRef} className="flex flex-col">
-            {SLIDER_WORDS_FOR_DISPLAY.map((word, i) => (
-              <span
-                key={i}
-                className="h-[1.5em] flex items-center justify-center whitespace-nowrap"
-              >
-                {word}
-              </span>
-            ))}
+        <div className="mt-8 flex w-full max-w-full items-center justify-center gap-2 font-body italic text-zinc-400 text-[calc(1.5rem+4px)]">
+          <span>for:</span>
+          <div className="h-[1.5em] min-w-0 overflow-hidden">
+            <div ref={wordTrackRef} className="flex flex-col">
+              {SLIDER_WORDS_FOR_DISPLAY.map((word, i) => (
+                <span
+                  key={i}
+                  className="h-[1.5em] flex items-center justify-center whitespace-nowrap"
+                >
+                  {word}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-8 pt-5">
-        <HeroNavButton
-          href="/about"
-          label="Contact"
-          imageSrc="/phone-button.png"
-          ariaLabel="About and contact"
-          imageClassName="rounded-full"
-        />
-        <HeroNavButton
-          href="/portfolio"
-          label="Portfolio"
-          imageSrc="/portfolio-button.png"
-          ariaLabel="Portfolio"
-          minWidthClass="min-w-[11rem]"
-        />
+        <div className="mt-10 flex w-full max-w-full flex-wrap items-center justify-center gap-8 pt-5">
+          <HeroNavButton
+            href="/about"
+            label="Contact"
+            imageSrc="/phone-button.png"
+            ariaLabel="About and contact"
+            imageClassName="rounded-full"
+          />
+          <HeroNavButton
+            href="/portfolio"
+            label="Portfolio"
+            imageSrc="/portfolio-button.png"
+            ariaLabel="Portfolio"
+            minWidthClass="min-w-[11rem]"
+          />
+        </div>
       </div>
     </section>
   );
@@ -443,8 +445,8 @@ function ProcessSection({
     <section className="content-section section-gap-after">
       <h2 className="headline">the process</h2>
 
-      <div className="w-[calc(100%+3rem)] -ml-6 md:w-full md:ml-0">
-        <div className="px-6 md:px-0">
+      <div className="md:w-[calc(100%+3rem)] md:-ml-6">
+        <div className="md:px-0">
           <div className="flex w-full justify-center mb-0">
             <div
               className="process-cut-slider-wrap relative flex min-h-[var(--process-thumb-w)] items-center min-w-0"
@@ -514,18 +516,6 @@ function IncludedBulletList({ compact }: { compact?: boolean }) {
         <li key={item}>{item}</li>
       ))}
     </ul>
-  );
-}
-
-function UnderlineHeading({ children }: { children: ReactNode }) {
-  return (
-    <h3 className="relative inline-block pb-4 pt-0">
-      {children}
-      <span
-        className="pointer-events-none absolute bottom-0 left-[-40px] right-[-40px] h-px bg-zinc-700"
-        aria-hidden
-      />
-    </h3>
   );
 }
 

@@ -1,6 +1,6 @@
 export default function Impressum() {
   return (
-    <main className="min-h-screen pt-24 px-6 max-w-4xl mx-auto">
+    <main className="hero-section min-h-screen max-md:max-w-none md:pt-24 md:px-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">Impressum & AGB</h1>
 
       <section className="mb-12">

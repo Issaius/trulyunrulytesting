@@ -58,6 +58,8 @@
   --corner-accent-size: min(42vw, 320px);
   --corner-accent-inset: 0.5rem;
   --corner-accent-clearance: calc(var(--corner-accent-size) + var(--corner-accent-inset));
+  /* Extra breathing room above the wing footer (footer is absolute — gap must live on content) */
+  --page-footer-content-gap: 60px;
 
   /* Mobile layout (< md) */
   --mobile-inline-padding: 5%;
@@ -163,9 +165,12 @@ h1,
   padding-bottom: 4rem;
 }
 
-/* Bottom-most section on each page — clearance for corner wings */
+/* Bottom-most section — reserve wing height + inset + content gap.
+   Do not pad the absolute Footer: it is out of flow, so pt there won't move images. */
 .page-last-section {
-  padding-bottom: var(--corner-accent-clearance);
+  padding-bottom: calc(
+    min(42vw, 320px) + var(--corner-accent-inset) + var(--page-footer-content-gap)
+  );
 }
 
 /* Smaller headings — Times New Roman */

@@ -3,7 +3,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-import { GALLERY_SHADOW, galleryShadowBoxCss } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText, type SanityRichText } from '@/lib/sanity-richtext';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
@@ -23,6 +22,10 @@ export type Slide = {
 interface CoverflowSliderProps {
     slides: Slide[];
 }
+
+/** Solid 8px frame — zinc-500 at 15% opacity; box-shadow avoids shrinking the image box. */
+const SLIDER_IMAGE_BORDER =
+    '0 0 0 8px color-mix(in oklab, var(--color-zinc-500) 15%, transparent)';
 
 type BoxSize = {
     width: number;
@@ -206,18 +209,16 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                             >
                                 <button
                                     type="button"
-                                    className={`relative ${imageBox ? 'block' : 'w-fit'} max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer ${imageBox ? '' : GALLERY_SHADOW}`}
-                                    style={
-                                        imageBox
+                                    className={`relative ${imageBox ? 'block' : 'w-fit'} max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer`}
+                                    style={{
+                                        boxShadow: SLIDER_IMAGE_BORDER,
+                                        ...(imageBox
                                             ? {
                                                 width: `${imageBox.width}px`,
                                                 height: `${imageBox.height}px`,
-                                                boxShadow: galleryShadowBoxCss(
-                                                    Math.min(imageBox.width, imageBox.height),
-                                                ),
                                             }
-                                            : undefined
-                                    }
+                                            : {}),
+                                    }}
                                     onClick={() => openLightbox(slides, currentIndex)}
                                     aria-label="Open image in full viewer"
                                 >

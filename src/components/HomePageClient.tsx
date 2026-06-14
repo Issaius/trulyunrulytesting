@@ -10,29 +10,15 @@ import {
   type RefObject,
 } from 'react';
 import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
+import { animatePageHeroFadeIn } from '@/lib/page-hero-fade-in';
 import CoverflowSlider from './CoverflowSlider';
+import TextSlider from './TextSlider';
 import UnderlineHeading from './UnderlineHeading';
 import type { HomeSliderSlide } from '@/lib/sanity-queries';
 
 // =============================================================================
 // Data (copy + config only)
 // =============================================================================
-
-const SLIDER_WORDS = [
-  'artisans',
-  'artists',
-  'extraordinaires',
-  'tattoo artists',
-  'people who care',
-  'drug dealers',
-  'outcasts',
-  'dissidents',
-  'felons',
-] as const;
-
-/** Extra first word at end so the loop can snap back off-screen. */
-const SLIDER_WORDS_FOR_DISPLAY = [...SLIDER_WORDS, SLIDER_WORDS[0]];
 
 const PROCESS_STEPS = [
   {
@@ -68,9 +54,9 @@ const PROCESS_STEPS = [
 ] as const;
 
 const PRICING_TIERS = [
-  { label: '1/4 Day', shooting: '2 Hours', travel: '1 Hour', price: '200€' },
-  { label: '1/2 Day', shooting: '4 Hours', travel: '2 Hours', price: '350€' },
-  { label: 'Full Day', shooting: '8 Hours', travel: '3 Hours', price: '700€' },
+  { label: '1/4 Day', shooting: '2 Hours', travel: '1 Hour', price: '200 €' },
+  { label: '1/2 Day', shooting: '4 Hours', travel: '2 Hours', price: '350 €' },
+  { label: 'Full Day', shooting: '8 Hours', travel: '3 Hours', price: '700 €' },
 ] as const;
 
 const PRICING_INCLUDED = [
@@ -80,89 +66,17 @@ const PRICING_INCLUDED = [
   'Post processing',
 ] as const;
 
-// =============================================================================
-// Hero — vertical word carousel (GSAP)
-// =============================================================================
-
-function createWordCarousel(track: HTMLDivElement, wordCount: number) {
-  let timeline: gsap.core.Timeline | null = null;
-  let lastRowHeightPx = -1;
-
-  const stop = () => {
-    timeline?.kill();
-    timeline = null;
-    gsap.killTweensOf(track);
-  };
-
-  const rebuild = () => {
-    const firstRow = track.firstElementChild as HTMLElement | null;
-    const rowH = firstRow?.getBoundingClientRect().height ?? 0;
-    if (rowH < 1) return;
-    if (timeline && Math.abs(rowH - lastRowHeightPx) < 0.5) return;
-    lastRowHeightPx = rowH;
-
-    stop();
-    gsap.set(track, { y: 0, yPercent: 0 });
-
-    const next = gsap.timeline({ repeat: -1 });
-    for (let step = 1; step <= wordCount; step++) {
-      next.to(
-        track,
-        { y: -step * rowH, duration: 0.6, ease: 'power3.inOut', force3D: true },
-        '+=1.5',
-      );
-    }
-    next.set(track, { y: 0 });
-    timeline = next;
-  };
-
-  const dispose = () => {
-    stop();
-    gsap.set(track, { y: 0, yPercent: 0 });
-  };
-
-  return { rebuild, dispose };
-}
+/** Fills the full column cell so content centers between the grid lines. */
+const PRICING_PRICE_CELL =
+  'flex w-full items-center justify-center px-4 text-center tabular-nums whitespace-nowrap leading-[1.3]';
 
 function useHomeHeroGsap(
   scope: RefObject<HTMLElement | null>,
   h1Ref: RefObject<HTMLHeadingElement | null>,
-  wordTrackRef: RefObject<HTMLDivElement | null>,
 ) {
   useGSAP(
     () => {
-      gsap.from(h1Ref.current, {
-        y: 80,
-        opacity: 0,
-        duration: 1,
-        ease: 'power4.out',
-        delay: 0.3,
-      });
-
-      const track = wordTrackRef.current;
-      if (!track) return;
-
-      const carousel = createWordCarousel(track, SLIDER_WORDS.length);
-      carousel.rebuild();
-
-      const firstRow = track.firstElementChild as HTMLElement | null;
-      const resizeObserver =
-        firstRow &&
-        new ResizeObserver(() => {
-          carousel.rebuild();
-        });
-      if (firstRow && resizeObserver) resizeObserver.observe(firstRow);
-
-      let mounted = true;
-      void document.fonts.ready.then(() => {
-        if (mounted) carousel.rebuild();
-      });
-
-      return () => {
-        mounted = false;
-        resizeObserver?.disconnect();
-        carousel.dispose();
-      };
+      animatePageHeroFadeIn(h1Ref.current);
     },
     { scope },
   );
@@ -315,7 +229,7 @@ function HeroNavButton({
   label,
   imageSrc,
   ariaLabel,
-  minWidthClass = 'min-w-[9.5rem]',
+  minWidthClass = 'min-w-[19rem]',
   imageClassName = '',
 }: {
   href: string;
@@ -328,11 +242,11 @@ function HeroNavButton({
   return (
     <a
       href={href}
-      className={`group relative inline-flex h-[120px] ${minWidthClass} shrink-0 items-center justify-center rounded-full border-0 bg-transparent px-4`}
+      className={`group relative inline-flex h-[240px] ${minWidthClass} shrink-0 items-center justify-center rounded-full border-0 bg-transparent px-8`}
       aria-label={ariaLabel}
     >
       <span
-        className="pointer-events-none absolute inset-0 flex items-center justify-center font-body text-[calc(1.5rem+4px)] tracking-wide text-white opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center font-body text-[calc(3rem+8px)] tracking-wide text-white opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
         aria-hidden
       >
         {label}
@@ -341,68 +255,84 @@ function HeroNavButton({
       <img
         src={imageSrc}
         alt=""
-        width={120}
-        height={120}
+        width={240}
+        height={240}
         draggable={false}
-        className={`pointer-events-none absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 select-none object-contain mix-blend-screen opacity-100 transition-opacity duration-300 ease-out group-hover:opacity-40 group-focus-visible:opacity-40 ${imageClassName}`}
+        className={`pointer-events-none absolute left-1/2 top-1/2 size-[240px] -translate-x-1/2 -translate-y-1/2 select-none object-contain mix-blend-screen opacity-100 transition-opacity duration-300 ease-out group-hover:opacity-40 group-focus-visible:opacity-40 ${imageClassName}`}
       />
     </a>
   );
 }
 
-function HeroSection({
-  h1Ref,
-  wordTrackRef,
-}: {
-  h1Ref: RefObject<HTMLHeadingElement | null>;
-  wordTrackRef: RefObject<HTMLDivElement | null>;
-}) {
+function useMirroredGap(
+  sourceRef: RefObject<HTMLDivElement | null>,
+  mirrorRef: RefObject<HTMLDivElement | null>,
+) {
+  useLayoutEffect(() => {
+    const source = sourceRef.current;
+    const mirror = mirrorRef.current;
+    if (!source || !mirror) return;
+
+    const sync = () => {
+      mirror.style.height = `${source.getBoundingClientRect().height}px`;
+    };
+
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(source);
+    window.addEventListener('resize', sync);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, [mirrorRef, sourceRef]);
+}
+
+function HeroSection({ h1Ref }: { h1Ref: RefObject<HTMLHeadingElement | null> }) {
+  const aboveButtonsGapRef = useRef<HTMLDivElement | null>(null);
+  const belowButtonsGapRef = useRef<HTMLDivElement | null>(null);
+
+  useMirroredGap(aboveButtonsGapRef, belowButtonsGapRef);
+
   return (
-    <section className="hero-section hero-section--from-top min-h-screen flex flex-col items-center justify-center max-md:justify-start text-center md:px-6">
-      <div className="hero-section-inner flex flex-col items-center">
-        <h1 ref={h1Ref}>
-          Photodesigner
-          <br />
-          based in munich
-        </h1>
+    <section className="hero-section hero-section--from-top text-center md:px-6">
+      <div className="hero-section-viewport flex min-h-svh flex-col items-center max-md:min-h-[calc(100svh-var(--mobile-hero-padding-top))]">
+        <div className="hidden min-h-0 flex-1 md:block" aria-hidden />
+        <div className="hero-section-inner flex flex-col items-center">
+          <h1 ref={h1Ref}>
+            Photodesigner
+            <br />
+            based in munich
+          </h1>
 
-        <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
-          (available worldwide)
-        </p>
+          <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
+            (available worldwide)
+          </p>
 
-        <div className="mt-8 flex w-full max-w-full items-center justify-center gap-2 font-body italic text-zinc-400 text-[calc(1.5rem+4px)]">
-          <span>for:</span>
-          <div className="h-[1.5em] min-w-0 overflow-hidden">
-            <div ref={wordTrackRef} className="flex flex-col">
-              {SLIDER_WORDS_FOR_DISPLAY.map((word, i) => (
-                <span
-                  key={i}
-                  className="h-[1.5em] flex items-center justify-center whitespace-nowrap"
-                >
-                  {word}
-                </span>
-              ))}
-            </div>
-          </div>
+          <TextSlider />
         </div>
-
-        <div className="mt-10 flex w-full max-w-full flex-wrap items-center justify-center gap-8 pt-5">
-          <HeroNavButton
-            href="/about"
-            label="Contact"
-            imageSrc="/phone-button.png"
-            ariaLabel="About and contact"
-            imageClassName="rounded-full"
-          />
-          <HeroNavButton
-            href="/portfolio"
-            label="Portfolio"
-            imageSrc="/portfolio-button.png"
-            ariaLabel="Portfolio"
-            minWidthClass="min-w-[11rem]"
-          />
-        </div>
+        <div ref={aboveButtonsGapRef} className="min-h-0 w-full flex-1" aria-hidden />
       </div>
+
+      <div className="hero-section-buttons flex w-full max-w-full flex-wrap items-center justify-center gap-16">
+        <HeroNavButton
+          href="/about"
+          label="Contact"
+          imageSrc="/phone-button.png"
+          ariaLabel="About and contact"
+          imageClassName="rounded-full"
+        />
+        <HeroNavButton
+          href="/portfolio"
+          label="Portfolio"
+          imageSrc="/portfolio-button.png"
+          ariaLabel="Portfolio"
+          minWidthClass="min-w-[22rem]"
+        />
+      </div>
+
+      <div ref={belowButtonsGapRef} className="w-full shrink-0" aria-hidden />
     </section>
   );
 }
@@ -485,13 +415,13 @@ function ProcessSection({
               {PROCESS_STEPS.map((step) => (
                 <div
                   key={step.id}
-                  className="process-step-card flex-shrink-0 flex flex-col min-w-[300px] w-[85vw] sm:w-[50vw] md:w-[350px]"
+                  className="process-step-card flex-shrink-0 flex flex-col w-[420px] max-w-[85vw]"
                 >
-                  <div className="flex flex-col justify-end h-[120px] px-8 pb-6 border-b-2 border-zinc-700">
-                    <h3 className="text-2xl lg:text-3xl font-serif">{step.title}</h3>
+                  <div className="flex w-full flex-col justify-end items-center h-[120px] px-8">
+                    <UnderlineHeading>{step.title}</UnderlineHeading>
                   </div>
-                  <div className="p-8 h-[250px]">
-                    <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
+                  <div className="w-full px-8 pb-8 h-[250px]">
+                    <p className="mt-4 text-zinc-300 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
                   </div>
                 </div>
               ))}
@@ -526,52 +456,47 @@ function PricingSection() {
 
       <div className="mb-16">
         <div className="hidden md:block w-full overflow-x-auto">
-          <table className="w-full min-w-[56rem] border-collapse text-center table-fixed">
+          <table className="w-full border-collapse text-center">
             <colgroup>
-              <col className="w-[29%]" />
-              <col className="w-[19%]" />
-              <col className="w-[35%]" />
-              <col className="w-[17%]" />
+              <col />
+              <col className="w-0" />
+              <col />
+              <col className="w-0" />
             </colgroup>
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="py-4 text-zinc-300 font-normal text-[28px]">Rates</th>
-                <th className="py-4 border-l border-zinc-800 px-2 text-zinc-300 font-normal text-[28px] whitespace-nowrap">
+                <th className="py-4 px-4 text-zinc-300 font-normal text-[40px]">Rates</th>
+                <th className="py-4 border-l border-zinc-800 px-4 text-zinc-300 font-normal text-[40px] whitespace-nowrap">
                   Travel Time
                 </th>
-                <th className="py-4 border-l border-zinc-800 px-2 text-zinc-300 font-normal text-[28px] whitespace-nowrap">
+                <th className="py-4 border-l border-zinc-800 px-4 text-zinc-300 font-normal text-[40px] whitespace-nowrap">
                   Included
                 </th>
-                <th className="py-4 border-l border-zinc-800 px-2 text-zinc-300 font-normal">Price</th>
+                <th className="border-l border-zinc-800 p-0 text-zinc-300 font-normal text-[40px]">
+                  <div className={`${PRICING_PRICE_CELL} py-4`}>Price</div>
+                </th>
               </tr>
             </thead>
             <tbody>
               {PRICING_TIERS.map((tier, index) => (
                 <tr key={tier.label} className="border-b border-zinc-800 last:border-b-0">
-                  <td className="py-6 align-top">
-                    <h3 className="text-4xl" style={{ padding: 0 }}>
-                      {tier.label}
-                    </h3>
+                  <td className="py-6 px-4 align-top">
+                    <h3 style={{ padding: 0 }}>{tier.label}</h3>
                     <p className="mt-2 text-zinc-300 italic">{tier.shooting} shooting time</p>
                   </td>
-                  <td className="py-6 border-l border-zinc-800 px-2 align-middle text-[28px] whitespace-nowrap text-zinc-300 italic">
+                  <td className="py-6 border-l border-zinc-800 px-4 align-middle text-[28px] whitespace-nowrap text-zinc-300 italic">
                     {tier.travel}
                   </td>
                   {index === 0 ? (
                     <td
                       rowSpan={PRICING_TIERS.length}
-                      className="py-6 border-l border-zinc-800 px-2 align-middle text-[28px] text-zinc-300"
+                      className="py-6 border-l border-zinc-800 px-4 align-middle text-[28px] text-zinc-300"
                     >
                       <IncludedBulletList />
                     </td>
                   ) : null}
-                  <td className="py-6 border-l border-zinc-800 px-2 align-middle">
-                    <p
-                      className="font-bold"
-                      style={{ fontFamily: 'var(--font-body)', fontSize: '40px', lineHeight: 1.3 }}
-                    >
-                      {tier.price}
-                    </p>
+                  <td className="border-l border-zinc-800 p-0 align-middle text-[40px]">
+                    <div className={`${PRICING_PRICE_CELL} py-6 font-bold`}>{tier.price}</div>
                   </td>
                 </tr>
               ))}
@@ -638,15 +563,14 @@ type HomePageClientProps = {
 export default function HomePageClient({ slides }: HomePageClientProps) {
   const gsapScopeRef = useRef<HTMLElement | null>(null);
   const h1Ref = useRef<HTMLHeadingElement | null>(null);
-  const wordTrackRef = useRef<HTMLDivElement | null>(null);
 
-  useHomeHeroGsap(gsapScopeRef, h1Ref, wordTrackRef);
+  useHomeHeroGsap(gsapScopeRef, h1Ref);
 
   const process = useProcessStripScrub();
 
   return (
     <main ref={gsapScopeRef} style={{ textAlign: 'center' }}>
-      <HeroSection h1Ref={h1Ref} wordTrackRef={wordTrackRef} />
+      <HeroSection h1Ref={h1Ref} />
       <HomeSliderSection slides={slides} />
       <ProcessSection
         stripRef={process.stripRef}

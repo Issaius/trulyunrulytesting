@@ -3,11 +3,12 @@
 import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
 
 import { GALLERY_SHADOW, GALLERY_SHADOW_HOVER } from '@/lib/gallery-shadow';
+import { animatePageHeroFadeIn } from '@/lib/page-hero-fade-in';
 import type { PortfolioGalleryImage } from '@/lib/sanity-queries';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
+import TextSlider from '@/components/TextSlider';
 
 const MOBILE_MQ = '(max-width: 767px)';
 
@@ -24,20 +25,6 @@ function getMobileMasonrySnapshot() {
 function getServerMobileMasonrySnapshot() {
   return false;
 }
-
-const SLIDER_WORDS = [
-  'artisans',
-  'artists',
-  'extraordinaires',
-  'tattoo artists',
-  'people who care',
-  'drug dealers',
-  'outcasts',
-  'dissidents',
-  'felons',
-] as const;
-
-const SLIDER_DISPLAY_WORDS = [...SLIDER_WORDS, SLIDER_WORDS[0]];
 
 function galleryShellClassName(isMobileMasonry: boolean, isCentered: boolean): string {
   const base =
@@ -168,7 +155,6 @@ const PortfolioGalleryCell = memo(function PortfolioGalleryCell({
 export default function PortfolioPageClient({ intro, images }: PortfolioPageClientProps) {
   const container = useRef(null);
   const h1Ref = useRef(null);
-  const sliderRef = useRef<HTMLDivElement | null>(null);
 
   const isMobileMasonry = useSyncExternalStore(
     subscribeMobileMasonry,
@@ -183,97 +169,28 @@ export default function PortfolioPageClient({ intro, images }: PortfolioPageClie
 
   useGSAP(
     () => {
-      gsap.from(h1Ref.current, {
-        y: 80,
-        opacity: 0,
-        duration: 1,
-        ease: 'power4.out',
-        delay: 0.3,
-      });
-
-      const track = sliderRef.current;
-      if (!track) return;
-
-      const totalWords = SLIDER_WORDS.length;
-      let tl: gsap.core.Timeline | null = null;
-
-      const killSlider = () => {
-        tl?.kill();
-        tl = null;
-        gsap.killTweensOf(track);
-      };
-
-      let lastRowPx = -1;
-      const buildSlider = () => {
-        const firstRow = track.firstElementChild as HTMLElement | null;
-        const rowPx = firstRow?.getBoundingClientRect().height ?? 0;
-        if (rowPx < 1) return;
-        if (tl && Math.abs(rowPx - lastRowPx) < 0.5) return;
-        lastRowPx = rowPx;
-
-        killSlider();
-        gsap.set(track, { y: 0, yPercent: 0 });
-
-        const nextTl = gsap.timeline({ repeat: -1 });
-        for (let k = 1; k <= totalWords; k++) {
-          nextTl.to(
-            track,
-            {
-              y: -k * rowPx,
-              duration: 0.6,
-              ease: 'power3.inOut',
-              force3D: true,
-            },
-            '+=1.5',
-          );
-        }
-        nextTl.set(track, { y: 0 });
-        tl = nextTl;
-      };
-
-      buildSlider();
-
-      const firstRow = track.firstElementChild as HTMLElement | null;
-      const ro =
-        firstRow &&
-        new ResizeObserver(() => {
-          buildSlider();
-        });
-      if (firstRow && ro) ro.observe(firstRow);
-
-      let alive = true;
-      void document.fonts.ready.then(() => {
-        if (alive) buildSlider();
-      });
-
-      return () => {
-        alive = false;
-        ro?.disconnect();
-        killSlider();
-        gsap.set(track, { y: 0, yPercent: 0 });
-      };
+      animatePageHeroFadeIn(h1Ref.current);
     },
     { scope: container },
   );
 
   return (
     <main ref={container} className="text-center">
-      <section className="hero-section min-h-screen flex flex-col items-center justify-center md:px-6">
-        <h1 ref={h1Ref} className="normal-case p-0">
-          The Work
-        </h1>
+      <section className="hero-section text-center md:px-6">
+        <div className="hero-section-viewport flex min-h-svh flex-col items-center max-md:min-h-[calc(100svh-var(--mobile-hero-padding-top))]">
+          <div className="hidden min-h-0 flex-1 md:block" aria-hidden />
+          <div className="hero-section-inner flex flex-col items-center">
+            <h1 ref={h1Ref} className="normal-case p-0">
+              The Work
+            </h1>
 
-        <div className="mt-8 text-[calc(1.5rem+4px)] font-body italic text-zinc-400 flex items-center justify-center gap-2 max-w-full">
-          <span>for:</span>
-          <div className="h-[1.5em] overflow-hidden text-left relative">
-            <div ref={sliderRef} className="flex flex-col">
-              {SLIDER_DISPLAY_WORDS.map((word, i) => (
-                <span key={i} className="h-[1.5em] flex items-center whitespace-nowrap">
-                  {word}
-                </span>
-              ))}
-            </div>
+            <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
+              (selected excerpts)
+            </p>
+
+            <TextSlider />
           </div>
+          <div className="min-h-0 w-full flex-1" aria-hidden />
         </div>
       </section>
 

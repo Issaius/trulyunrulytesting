@@ -1,17 +1,19 @@
 import AboutImageSlider from "@/components/AboutImageSlider";
+import PageHeroHeading from "@/components/PageHeroHeading";
+import TextSlider from "@/components/TextSlider";
 import UnderlineHeading from "@/components/UnderlineHeading";
 import { getAboutPage } from "@/lib/sanity-queries";
 
 const ABOUT_NAME_FALLBACK = "Rupert C. Lohse";
 const ABOUT_BIO_TOP_FALLBACK =
-  "Most artists would put to some kind of pesudo-intellectual quote here.";
+  "Most artists would put to some kind of pseudo-intellectual quote here.";
 const ABOUT_BIO_BOTTOM_FALLBACK =
   "I don't know what to tell you, I just enjoy creating photos that go hard.";
 const ABOUT_SECTION_HEADING_FALLBACK = "My take on AI";
 const ABOUT_SECTION_BODY_TOP_FALLBACK =
-  "I use AI. Specifically for: Denoising, some beauty retouching and to create this website.";
+  "I use AI. Specifically for: Denoising, some beauty retouching and the technical development of this website.";
 const ABOUT_SECTION_BODY_BOTTOM_FALLBACK =
-  "Outside of that, I am a big fan of actually doing the work myself, so rest assured that the photos I display are truly real images, with post processing practices that any \"old school\" professional photographer also would have used. If they had the chance to do so.";
+  "Outside of that, I am a big fan of actually doing the work myself, so rest assured that the photos I display are truly real images, with post processing practices that any \"old school\" professional photographer also would have used.";
 const ABOUT_CONTACT_EMAIL_FALLBACK = "contact@unrulytruly.eu";
 const ABOUT_WORK_TYPES_HEADING_FALLBACK = "Work I'd like to do";
 const ABOUT_WORK_TYPES_PINTEREST_URL = "https://pin.it/2yR8hZV2H";
@@ -21,10 +23,20 @@ export default async function About() {
 
   return (
     <main>
-      <section className="hero-section min-h-screen flex flex-col items-center justify-center text-center md:px-6">
-        <h1>
-          who I am:
-        </h1>
+      <section className="hero-section text-center md:px-6">
+        <div className="hero-section-viewport flex min-h-svh flex-col items-center max-md:min-h-[calc(100svh-var(--mobile-hero-padding-top))]">
+          <div className="hidden min-h-0 flex-1 md:block" aria-hidden />
+          <div className="hero-section-inner flex flex-col items-center">
+            <PageHeroHeading>who I am:</PageHeroHeading>
+
+            <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
+              (a few pretentious paragraphs)
+            </p>
+
+            <TextSlider />
+          </div>
+          <div className="min-h-0 w-full flex-1" aria-hidden />
+        </div>
       </section>
 
       <section className="content-section section-gap-after">
@@ -38,7 +50,7 @@ export default async function About() {
               {ABOUT_BIO_BOTTOM_FALLBACK}
             </p>
           </div>
-          <div className="w-full md:basis-[65%] md:shrink-0 md:min-w-0">
+          <div className="w-full md:basis-[65%] md:shrink-0 md:min-w-0 md:-ml-[60px]">
             <AboutImageSlider slides={about.slides} />
           </div>
         </div>

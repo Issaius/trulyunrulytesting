@@ -97,12 +97,12 @@ export default function AboutImageSlider({
   }, [slides.length]);
 
   const shellClass =
-    'relative w-full max-w-[min(100%,min(calc(90vw_*_1.3),calc(42rem_*_1.3)))] mx-auto md:mx-0 md:ml-auto';
+    'relative w-2/3 max-w-[min(100%,min(calc(60vw_*_1.3),calc(28rem_*_1.3)))] mx-auto md:mx-0 md:ml-auto';
 
   if (slides.length === 0) {
     return (
       <div className={shellClass}>
-        <div className="aspect-[3/2] w-full bg-black flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
+        <div className="aspect-square w-full bg-black flex items-center justify-center text-zinc-500 text-sm px-4 text-center">
           Add images to the slider.
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function AboutImageSlider({
     <div className={shellClass}>
       <div
         ref={frameRef}
-        className="relative aspect-[3/2] w-full overflow-visible bg-black"
+        className="relative aspect-square w-full overflow-visible bg-black"
       >
         {slides.map((slide, i) => {
           const iw = slide.width ?? 2400;
@@ -145,7 +145,7 @@ export default function AboutImageSlider({
                     alt={slide.alt}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) min(100vw, calc(90vw * 1.3)), min(calc(42rem * 1.3), calc(90vw * 1.3))"
+                    sizes="(max-width: 768px) min(66vw, calc(60vw * 1.3)), min(calc(28rem * 1.3), calc(60vw * 1.3))"
                     priority={i === 0}
                   />
                 </div>
@@ -156,7 +156,7 @@ export default function AboutImageSlider({
                     alt={slide.alt}
                     fill
                     className="object-contain object-center"
-                    sizes="(max-width: 768px) min(100vw, calc(90vw * 1.3)), min(calc(42rem * 1.3), calc(90vw * 1.3))"
+                    sizes="(max-width: 768px) min(66vw, calc(60vw * 1.3)), min(calc(28rem * 1.3), calc(60vw * 1.3))"
                     priority={i === 0}
                   />
                 </div>

@@ -23,9 +23,8 @@ interface CoverflowSliderProps {
     slides: Slide[];
 }
 
-/** Solid 8px frame — zinc-500 at 15% opacity; box-shadow avoids shrinking the image box. */
-const SLIDER_IMAGE_BORDER =
-    '0 0 0 8px color-mix(in oklab, var(--color-zinc-500) 15%, transparent)';
+/** Solid 8px frame — pure white; box-shadow avoids shrinking the image box. */
+const SLIDER_IMAGE_BORDER = '0 0 0 8px #fff';
 
 type BoxSize = {
     width: number;

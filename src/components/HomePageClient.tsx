@@ -330,6 +330,12 @@ function HeroSection({ h1Ref }: { h1Ref: RefObject<HTMLHeadingElement | null> })
           ariaLabel="Portfolio"
           minWidthClass="min-w-[22rem]"
         />
+        <HeroNavButton
+          href="#pricing"
+          label="Pricing"
+          imageSrc="/pricing-button.png"
+          ariaLabel="Pricing"
+        />
       </div>
 
       <div ref={belowButtonsGapRef} className="w-full shrink-0" aria-hidden />
@@ -451,7 +457,7 @@ function IncludedBulletList({ compact }: { compact?: boolean }) {
 
 function PricingSection() {
   return (
-    <section className="content-section page-last-section pt-0">
+    <section id="pricing" className="content-section page-last-section pt-0 scroll-mt-24">
       <h2 className="headline">pricing</h2>
 
       <div className="mb-16">

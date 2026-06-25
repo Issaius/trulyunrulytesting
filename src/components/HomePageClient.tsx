@@ -39,17 +39,17 @@ const PROCESS_STEPS = [
   {
     id: 4,
     title: '4. Photoshoot',
-    desc: "This is where the magic happens. We'll spend the allotted time capturing the best possible frames based on our plan.",
+    desc: 'This is where the magic happens.',
   },
   {
     id: 5,
     title: '5. Selection',
-    desc: 'We review all the raw shots together and select the final images that perfectly capture our desired artistic vision.',
+    desc: 'After my initial culling you may choose the finale images you want to keep. After that I will do all the necessary post-processing.',
   },
   {
     id: 6,
     title: '6. Delivery',
-    desc: 'You get exactly what you paid for. The final, fully retouched high-resolution images will be securely delivered to you.',
+    desc: 'You\'ll get em.',
   },
 ] as const;
 
@@ -69,6 +69,21 @@ const PRICING_INCLUDED = [
 /** Fills the full column cell so content centers between the grid lines. */
 const PRICING_PRICE_CELL =
   'flex w-full items-center justify-center px-4 text-center tabular-nums whitespace-nowrap leading-[1.3]';
+
+function PricingGridScrew({ className }: { className: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- mix-blend-screen; white keyed on page bg
+    <img
+      src="/pricing-screw.png"
+      alt=""
+      width={40}
+      height={40}
+      draggable={false}
+      className={`pointer-events-none absolute z-10 size-10 select-none object-contain mix-blend-screen ${className}`}
+      aria-hidden
+    />
+  );
+}
 
 function useHomeHeroGsap(
   scope: RefObject<HTMLElement | null>,
@@ -471,7 +486,10 @@ function PricingSection() {
             </colgroup>
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="py-4 px-4 text-zinc-300 font-normal text-[40px]">Rates</th>
+                <th className="relative p-0 text-zinc-300 font-normal text-[40px]">
+                  <div className="py-4 px-4">Rates</div>
+                  <PricingGridScrew className="bottom-0 right-0 translate-x-1/2 translate-y-1/2" />
+                </th>
                 <th className="py-4 border-l border-zinc-800 px-4 text-zinc-300 font-normal text-[40px] whitespace-nowrap">
                   Travel Time
                 </th>
@@ -501,7 +519,10 @@ function PricingSection() {
                       <IncludedBulletList />
                     </td>
                   ) : null}
-                  <td className="border-l border-zinc-800 p-0 align-middle text-[40px]">
+                  <td className="relative border-l border-zinc-800 p-0 align-middle text-[40px]">
+                    {index === 1 ? (
+                      <PricingGridScrew className="bottom-0 left-0 -translate-x-1/2 translate-y-1/2" />
+                    ) : null}
                     <div className={`${PRICING_PRICE_CELL} py-6 font-bold`}>{tier.price}</div>
                   </td>
                 </tr>

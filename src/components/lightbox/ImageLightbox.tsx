@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 
-import { GALLERY_SHADOW } from '@/lib/gallery-shadow';
+import { GALLERY_IMAGE_BORDER_CLASS } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText } from '@/lib/sanity-richtext';
 
@@ -141,7 +141,7 @@ export default function ImageLightbox({ items, index, onClose, onPrev, onNext }:
         >
           <div className="flex min-h-0 flex-1 items-center justify-center">
             <div
-              className={`relative w-fit max-h-[min(72dvh,760px)] max-w-full ${GALLERY_SHADOW}`}
+              className={`relative w-fit max-h-[min(72dvh,760px)] max-w-full ${GALLERY_IMAGE_BORDER_CLASS}`}
               onClick={(e) => e.stopPropagation()}
             >
               <Image

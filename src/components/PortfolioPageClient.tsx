@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore } 
 import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
 
-import { GALLERY_SHADOW, GALLERY_SHADOW_HOVER } from '@/lib/gallery-shadow';
+import { GALLERY_IMAGE_BORDER_CLASS, GALLERY_IMAGE_BORDER_HOVER_CLASS } from '@/lib/gallery-shadow';
 import { animatePageHeroFadeIn } from '@/lib/page-hero-fade-in';
 import type { PortfolioGalleryImage } from '@/lib/sanity-queries';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
@@ -30,9 +30,9 @@ function galleryShellClassName(isMobileMasonry: boolean, isCentered: boolean): s
   const base =
     'mb-4 sm:mb-5 break-inside-avoid transition-shadow duration-[675ms] ease-out shadow-none';
   if (isMobileMasonry) {
-    return isCentered ? `${base} ${GALLERY_SHADOW}` : base;
+    return isCentered ? `${base} ${GALLERY_IMAGE_BORDER_CLASS}` : base;
   }
-  return `${base} ${GALLERY_SHADOW_HOVER}`;
+  return `${base} ${GALLERY_IMAGE_BORDER_HOVER_CLASS}`;
 }
 
 function useCenteredMasonryIndex(isMobileMasonry: boolean, imageCount: number) {

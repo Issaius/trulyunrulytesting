@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { galleryShadowBoxCss } from '@/lib/gallery-shadow';
+import { GALLERY_IMAGE_BORDER } from '@/lib/gallery-shadow';
 
 export type AboutSlide = {
   src: string;
@@ -137,7 +137,7 @@ export default function AboutImageSlider({
                     height: `${imageBox.height}px`,
                     maxWidth: '100%',
                     maxHeight: '100%',
-                    boxShadow: galleryShadowBoxCss(Math.min(imageBox.width, imageBox.height)),
+                    boxShadow: GALLERY_IMAGE_BORDER,
                   }}
                 >
                   <Image
@@ -150,7 +150,10 @@ export default function AboutImageSlider({
                   />
                 </div>
               ) : (
-                <div className="relative h-full w-full">
+                <div
+                  className="relative h-full w-full"
+                  style={{ boxShadow: GALLERY_IMAGE_BORDER }}
+                >
                   <Image
                     src={slide.src}
                     alt={slide.alt}

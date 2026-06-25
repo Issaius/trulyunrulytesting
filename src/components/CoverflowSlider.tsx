@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
+import { GALLERY_IMAGE_BORDER } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText, type SanityRichText } from '@/lib/sanity-richtext';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
@@ -22,9 +23,6 @@ export type Slide = {
 interface CoverflowSliderProps {
     slides: Slide[];
 }
-
-/** Solid 8px frame — pure white; box-shadow avoids shrinking the image box. */
-const SLIDER_IMAGE_BORDER = '0 0 0 8px #fff';
 
 type BoxSize = {
     width: number;
@@ -210,7 +208,7 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                                     type="button"
                                     className={`relative ${imageBox ? 'block' : 'w-fit'} max-h-full max-w-full border-0 bg-transparent p-0 cursor-pointer`}
                                     style={{
-                                        boxShadow: SLIDER_IMAGE_BORDER,
+                                        boxShadow: GALLERY_IMAGE_BORDER,
                                         ...(imageBox
                                             ? {
                                                 width: `${imageBox.width}px`,

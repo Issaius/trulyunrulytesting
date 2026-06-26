@@ -76,10 +76,10 @@ function PricingGridScrew({ className }: { className: string }) {
     <img
       src="/pricing-screw.png"
       alt=""
-      width={40}
-      height={40}
+      width={60}
+      height={60}
       draggable={false}
-      className={`pointer-events-none absolute z-10 size-10 select-none object-contain mix-blend-screen ${className}`}
+      className={`pointer-events-none absolute z-10 size-[60px] select-none object-contain mix-blend-screen ${className}`}
       aria-hidden
     />
   );
@@ -488,7 +488,7 @@ function PricingSection() {
               <tr className="border-b border-zinc-800">
                 <th className="relative p-0 text-zinc-300 font-normal text-[40px]">
                   <div className="py-4 px-4">Rates</div>
-                  <PricingGridScrew className="bottom-0 right-0 translate-x-1/2 translate-y-1/2" />
+                  <PricingGridScrew className="bottom-0 right-0 translate-x-1/2 translate-y-1/2 rotate-90" />
                 </th>
                 <th className="py-4 border-l border-zinc-800 px-4 text-zinc-300 font-normal text-[40px] whitespace-nowrap">
                   Travel Time

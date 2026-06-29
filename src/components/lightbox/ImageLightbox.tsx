@@ -7,6 +7,8 @@ import { GALLERY_IMAGE_BORDER_CLASS } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText } from '@/lib/sanity-richtext';
 
+import PointerNavButton from '@/components/PointerNavButton';
+
 import type { LightboxItem } from './types';
 
 type ImageLightboxProps = {
@@ -59,37 +61,6 @@ export default function ImageLightbox({ items, index, onClose, onPrev, onNext }:
   const w = current.width ?? 2400;
   const h = current.height ?? 1600;
 
-  const NavIconPrev = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2.5}
-      stroke="currentColor"
-      className="w-5 h-5 md:w-6 md:h-6 text-white"
-      aria-hidden
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-    </svg>
-  );
-
-  const NavIconNext = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2.5}
-      stroke="currentColor"
-      className="w-5 h-5 md:w-6 md:h-6 text-white"
-      aria-hidden
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-    </svg>
-  );
-
-  const navBtnClass =
-    'w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors shrink-0';
-
   const CloseIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -125,12 +96,8 @@ export default function ImageLightbox({ items, index, onClose, onPrev, onNext }:
           </button>
           {items.length > 1 ? (
             <div className="flex flex-col items-end gap-2">
-              <button type="button" className={navBtnClass} onClick={onNext} aria-label="Next image">
-                {NavIconNext}
-              </button>
-              <button type="button" className={navBtnClass} onClick={onPrev} aria-label="Previous image">
-                {NavIconPrev}
-              </button>
+              <PointerNavButton direction="right" onClick={onNext} ariaLabel="Next image" />
+              <PointerNavButton direction="left" onClick={onPrev} ariaLabel="Previous image" />
             </div>
           ) : null}
         </div>

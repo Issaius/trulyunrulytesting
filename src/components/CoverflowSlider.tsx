@@ -7,6 +7,7 @@ import { GALLERY_IMAGE_BORDER } from '@/lib/gallery-shadow';
 import { getFileNameFromSrc } from '@/lib/image-filename';
 import { renderSanityRichText, richTextToPlainText, type SanityRichText } from '@/lib/sanity-richtext';
 import { useLightbox } from '@/components/lightbox/LightboxProvider';
+import PointerNavButton from '@/components/PointerNavButton';
 
 export type Slide = {
     src: string;
@@ -158,26 +159,8 @@ export default function CoverflowSlider({ slides }: CoverflowSliderProps) {
                         </div>
                     </div>
                     <div className="flex flex-shrink-0 items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={prevSlide}
-                            className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
-                            aria-label="Previous Slide"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                            </svg>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={nextSlide}
-                            className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
-                            aria-label="Next Slide"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6 text-white">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                            </svg>
-                        </button>
+                        <PointerNavButton direction="left" onClick={prevSlide} ariaLabel="Previous Slide" />
+                        <PointerNavButton direction="right" onClick={nextSlide} ariaLabel="Next Slide" />
                     </div>
                 </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 type PointerNavButtonProps = {
-  direction: 'left' | 'right';
+  direction: 'left' | 'right' | 'close';
   onClick: () => void;
   ariaLabel: string;
   className?: string;
@@ -10,6 +10,7 @@ type PointerNavButtonProps = {
 const POINTER_SRC = {
   left: '/pointer-left.png',
   right: '/pointer-right.png',
+  close: '/pointer-close.png',
 } as const;
 
 export default function PointerNavButton({

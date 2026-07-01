@@ -61,20 +61,6 @@ export default function ImageLightbox({ items, index, onClose, onPrev, onNext }:
   const w = current.width ?? 2400;
   const h = current.height ?? 1600;
 
-  const CloseIcon = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2.5}
-      stroke="currentColor"
-      className="h-5 w-5 md:h-6 md:w-6 text-zinc-200"
-      aria-hidden
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-    </svg>
-  );
-
   return (
     <div
       className="fixed inset-0 z-[100] flex min-h-0 flex-col"
@@ -86,14 +72,7 @@ export default function ImageLightbox({ items, index, onClose, onPrev, onNext }:
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col pointer-events-none">
         <div className="pointer-events-auto absolute right-4 top-4 z-20 flex flex-col items-end gap-2 md:right-6 md:top-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900/90 text-zinc-200 transition-colors hover:bg-zinc-800 md:h-12 md:w-12"
-            aria-label="Close viewer"
-          >
-            {CloseIcon}
-          </button>
+          <PointerNavButton direction="close" onClick={onClose} ariaLabel="Close viewer" />
           {items.length > 1 ? (
             <div className="flex flex-col items-end gap-2">
               <PointerNavButton direction="right" onClick={onNext} ariaLabel="Next image" />

@@ -97,7 +97,7 @@ export default function AboutImageSlider({
   }, [slides.length]);
 
   const shellClass =
-    'relative w-2/3 max-w-[min(100%,min(calc(60vw_*_1.3),calc(28rem_*_1.3)))] mx-auto md:mx-0 md:ml-auto';
+    'relative w-2/3 max-w-[min(100%,min(calc(60vw_*_1.3),calc(28rem_*_1.3)))] mx-auto md:mx-0';
 
   if (slides.length === 0) {
     return (

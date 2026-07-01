@@ -129,6 +129,11 @@ h1,
   margin-bottom: var(--section-headline-gap-after);
 }
 
+/* Below-fold headline inside hero — flex gap above replaces section opener padding */
+.hero-below-fold-headline {
+  padding-top: 0;
+}
+
 /* Shared content column — 75vw cap, centered, horizontal padding */
 .content-section {
   width: 100%;

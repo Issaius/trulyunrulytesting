@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useGSAP } from '@gsap/react';
 import { animatePageHeroFadeIn } from '@/lib/page-hero-fade-in';
+import { useMirroredGap } from '@/hooks/useMirroredGap';
 import CoverflowSlider from './CoverflowSlider';
 import TextSlider from './TextSlider';
 import UnderlineHeading from './UnderlineHeading';
@@ -24,7 +25,7 @@ const PROCESS_STEPS = [
   {
     id: 1,
     title: '1. Discovery',
-    desc: 'We get to know each other, talk about what general project you have in mind, and decide if it makes sense to work together.',
+    desc: 'We get to know each other, talk about what you need, and decide if it makes sense to work together.',
   },
   {
     id: 2,
@@ -44,7 +45,7 @@ const PROCESS_STEPS = [
   {
     id: 5,
     title: '5. Selection',
-    desc: 'After my initial culling you may choose the finale images you want to keep. After that I will do all the necessary post-processing.',
+    desc: 'After my initial culling you may choose the final images you want to keep. After that I will do all the necessary post-processing.',
   },
   {
     id: 6,
@@ -279,31 +280,6 @@ function HeroNavButton({
   );
 }
 
-function useMirroredGap(
-  sourceRef: RefObject<HTMLDivElement | null>,
-  mirrorRef: RefObject<HTMLDivElement | null>,
-) {
-  useLayoutEffect(() => {
-    const source = sourceRef.current;
-    const mirror = mirrorRef.current;
-    if (!source || !mirror) return;
-
-    const sync = () => {
-      mirror.style.height = `${source.getBoundingClientRect().height}px`;
-    };
-
-    sync();
-    const observer = new ResizeObserver(sync);
-    observer.observe(source);
-    window.addEventListener('resize', sync);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', sync);
-    };
-  }, [mirrorRef, sourceRef]);
-}
-
 function HeroSection({ h1Ref }: { h1Ref: RefObject<HTMLHeadingElement | null> }) {
   const aboveButtonsGapRef = useRef<HTMLDivElement | null>(null);
   const belowButtonsGapRef = useRef<HTMLDivElement | null>(null);
@@ -438,10 +414,10 @@ function ProcessSection({
                   key={step.id}
                   className="process-step-card flex-shrink-0 flex flex-col w-[420px] max-w-[85vw]"
                 >
-                  <div className="flex w-full flex-col justify-end items-center h-[120px] px-8">
+                  <div className="flex w-full flex-col justify-end items-center min-h-[120px] px-8">
                     <UnderlineHeading>{step.title}</UnderlineHeading>
                   </div>
-                  <div className="w-full px-8 pb-8 h-[250px]">
+                  <div className="w-full px-8 pb-8 min-h-[250px]">
                     <p className="mt-4 text-zinc-300 leading-relaxed whitespace-pre-wrap">{step.desc}</p>
                   </div>
                 </div>

@@ -1,13 +1,12 @@
 import AboutImageSlider from "@/components/AboutImageSlider";
-import PageHeroHeading from "@/components/PageHeroHeading";
-import TextSlider from "@/components/TextSlider";
+import AboutPageHero from "@/components/AboutPageHero";
 import UnderlineHeading from "@/components/UnderlineHeading";
 import { getAboutPage } from "@/lib/sanity-queries";
 
-const ABOUT_NAME_FALLBACK = "Rupert C. Lohse";
-const ABOUT_BIO_TOP_FALLBACK =
+const ABOUT_INTRO_HEADING = "Rupert Cornelius Lohse";
+const ABOUT_INTRO_BODY_TOP =
   "Most artists would put to some kind of pseudo-intellectual quote here.";
-const ABOUT_BIO_BOTTOM_FALLBACK =
+const ABOUT_INTRO_BODY_BOTTOM =
   "I don't know what to tell you, I just enjoy creating photos that go hard.";
 const ABOUT_SECTION_HEADING_FALLBACK = "My take on AI";
 const ABOUT_SECTION_BODY_TOP_FALLBACK =
@@ -23,60 +22,39 @@ export default async function About() {
 
   return (
     <main>
-      <section className="hero-section text-center md:px-6">
-        <div className="hero-section-viewport flex min-h-svh flex-col items-center max-md:min-h-[calc(100svh-var(--mobile-hero-padding-top))]">
-          <div className="hidden min-h-0 flex-1 md:block" aria-hidden />
-          <div className="hero-section-inner flex flex-col items-center">
-            <PageHeroHeading>who I am:</PageHeroHeading>
+      <AboutPageHero
+        introHeading={ABOUT_INTRO_HEADING}
+        introBodyTop={ABOUT_INTRO_BODY_TOP}
+        introBodyBottom={ABOUT_INTRO_BODY_BOTTOM}
+      />
 
-            <p className="mt-2 text-xl font-body lowercase tracking-wide text-zinc-500">
-              (a few pretentious paragraphs)
-            </p>
-
-            <TextSlider />
-          </div>
-          <div className="min-h-0 w-full flex-1" aria-hidden />
-        </div>
-      </section>
-
-      <section className="content-section section-gap-after">
+      <section className="content-section section-gap-after text-center">
         <div className="flex flex-col md:flex-row gap-12 md:gap-16 items-start md:items-center">
-          <div className="w-full md:basis-[35%] md:shrink-0 md:min-w-0">
-            <h2 className="text-4xl font-bold mb-6">{ABOUT_NAME_FALLBACK}</h2>
-            <p className="text-zinc-400 mb-4">
-              {ABOUT_BIO_TOP_FALLBACK}
-            </p>
-            <p className="text-zinc-400">
-              {ABOUT_BIO_BOTTOM_FALLBACK}
-            </p>
-          </div>
-          <div className="w-full md:basis-[65%] md:shrink-0 md:min-w-0 md:-ml-[60px]">
+          <div className="w-full md:basis-[65%] md:shrink-0 md:min-w-0">
             <AboutImageSlider slides={about.slides} />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 text-center mt-12 md:mt-16">
-          <div>
-            <UnderlineHeading>Contact</UnderlineHeading>
-            <p className="mt-4 text-zinc-300 !text-[28px] max-w-md mx-auto">
-              {ABOUT_CONTACT_EMAIL_FALLBACK}
-            </p>
-          </div>
+          <div className="w-full md:basis-[35%] md:shrink-0 md:min-w-0 flex flex-col gap-12 items-center">
+            <div>
+              <UnderlineHeading>Contact</UnderlineHeading>
+              <p className="mt-4 text-zinc-300 max-w-md mx-auto">{ABOUT_CONTACT_EMAIL_FALLBACK}</p>
+            </div>
 
-          <div>
-            <UnderlineHeading>{ABOUT_WORK_TYPES_HEADING_FALLBACK}</UnderlineHeading>
-            <p className="mt-4 text-zinc-300 max-w-md mx-auto">
-              Please see{" "}
-              <a
-                href={ABOUT_WORK_TYPES_PINTEREST_URL}
-                className="underline decoration-1 underline-offset-4 hover:text-zinc-200 transition-colors"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                here
-              </a>{" "}
-              for types of work I am interested in shooting as well, but wasn&apos;t able to do yet.
-            </p>
+            <div>
+              <UnderlineHeading>{ABOUT_WORK_TYPES_HEADING_FALLBACK}</UnderlineHeading>
+              <p className="mt-4 text-zinc-300 max-w-md mx-auto">
+                Please see{" "}
+                <a
+                  href={ABOUT_WORK_TYPES_PINTEREST_URL}
+                  className="underline decoration-1 underline-offset-4 hover:text-zinc-200 transition-colors"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  here
+                </a>{" "}
+                for types of work I am interested in shooting as well, but wasn&apos;t able to do yet.
+              </p>
+            </div>
           </div>
         </div>
       </section>
